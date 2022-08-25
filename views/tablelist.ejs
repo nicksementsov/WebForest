@@ -1,0 +1,55 @@
+<%- include ('partials/head') %>
+<%- include ('partials/navbar') %>
+<div class="row">
+	<div class="col">
+		<table class="table table-striped">
+			<thead>
+				<th scope="col">Equipment ID</th>
+				<th scope="col">Equipment Name</th>
+				<th scope="col">Strength</th>
+				<th scope="col">Dexterity</th>
+				<th scope="col">Intelligence</th>
+				<th scope="col">Charisma</th>
+			</thead>
+			<tbody>
+				<% for (let item of equipment) {%>
+					<tr>
+						<th scope="row"><%= item[`${slot}_equipment_id`] %></th>
+						<td><%= item.equipment_name.trim() %></td>
+						<td><%= item.bonus_str %></td>
+						<td><%= item.bonus_dex %></td>
+						<td><%= item.bonus_int %></td>
+						<td><%= item.bonus_cha %></td>
+					</tr>
+				<% } %>
+			</tbody>
+		</table>
+	</div>
+</div>
+<form action="/additem" method="POST">
+	<div class="row mb-1">
+		<div class="col-2">
+			<input type="text" class="form-control" name="eqName" id="equipmentName" aria-describedby="eqName" placeholder="Equipment Name">
+		</div>
+		<div class="col-1">
+			<input type="text" class="form-control" id="eqLevel" aria-describedby="eqLevel" name="eqLevel" placeholder="Level">
+		</div>
+		<div class="col-2">
+			<input type="text" class="form-control" id="equipmentStrength" aria-describedby="eqName" name="bonStr" placeholder="Bonus Strength">
+		</div>
+		<div class="col-2">
+			<input type="text" class="form-control" id="equipmentDexterity" aria-describedby="eqName" name="bonDex" placeholder="Bonus Dexterity">
+		</div>
+		<div class="col-2">
+			<input type="text" class="form-control" id="equipmentIntelligence" aria-describedby="eqName" name="bonInt" placeholder="Bonus Intelligence">
+		</div>
+		<div class="col-2">
+			<input type="text" class="form-control" id="equipmentCharisma" aria-describedby="eqName" name="bonCha" placeholder="Bonus Charisma">
+		</div>
+		<div class="col-1">
+			<input type="hidden" id="equipmentSlot" name="slot" value="<%= slot %>"> 
+			<button type="submit" class="btn btn-primary" href="/additem">Add</button>
+		</div>
+	</div>
+</form>
+<%- include ('partials/foot') %>
