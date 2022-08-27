@@ -17,6 +17,10 @@ app.use('/js', express.static(path.join(__dirname, '/node_modules/@popperjs/core
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 
+app.get('/newplayer/', (req, res) => {
+	res.render('newplayer',{title: 'Create New Player'});
+});
+
 app.get('/player/:player_id', (req, res) => {
 	equipment_slots = 
 	[

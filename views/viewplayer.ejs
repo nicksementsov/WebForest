@@ -2,7 +2,7 @@
 <%- include ('partials/navbar') %>
 <div class="row">
 	<div class="col-3 col-md-6">
-		<img src="/static/img/warrior_lg.png" class="img-fluid" alt="warrior">
+		<img src="/static/img/<%= player.class_name %>_lg.png" class="img-fluid" alt="warrior">
 	</div>
 	<div class="col-9 col-md-6">
 		<h2><%= player.player_name %></h2>
@@ -37,7 +37,7 @@
 		</div>
 		<div class="row mb-2">
 			<div class="col-6">
-				<div class="card">
+				<div class="card" id="headEquCard">
 					<div class="card-body">
 						<h5 class="card-title mb-3"><%= player.player_equ[0].equipment_name.trim() %></h5>
 						<p class="card-text mb-0">Strength: <%= player.player_equ[0].bonus_str %></p>
@@ -49,7 +49,7 @@
 			</div>
 		</div>
 		<div class="row mb-2">
-			<div class="col">
+			<div class="col-6">
 				<div class="card">
 					<div class="card-body">
 						<h5 class="card-title mb-3"><%= player.player_equ[1].equipment_name.trim() %></h5>
@@ -60,7 +60,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col">
+			<div class="col-6">
 				<div class="card">
 					<div class="card-body">
 						<h5 class="card-title mb-3"><%= player.player_equ[3].equipment_name.trim() %></h5>
@@ -73,7 +73,7 @@
 			</div>
 		</div>
 		<div class="row">
-			<div class="col">
+			<div class="col-6">
 				<div class="card">
 					<div class="card-body">
 						<h5 class="card-title mb-3"><%= player.player_equ[2].equipment_name.trim() %></h5>
@@ -84,7 +84,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col">
+			<div class="col-6">
 				<div class="card">
 					<div class="card-body">
 						<h5 class="card-title mb-3"><%= player.player_equ[4].equipment_name.trim() %></h5>
@@ -98,4 +98,5 @@
 		</div>
 	</div>
 </div>
+<script type="text/javascript" src="/static/js/test.js"></script>
 <%- include ('partials/foot') %>
