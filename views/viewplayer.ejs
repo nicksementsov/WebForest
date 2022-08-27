@@ -44,6 +44,7 @@
 						<p class="card-text mb-0">Dexterity: <%= player.player_equ[0].bonus_dex %></p>
 						<p class="card-text mb-0">Intelligence: <%= player.player_equ[0].bonus_int %></p>
 						<p class="card-text mb-0">Charisma: <%= player.player_equ[0].bonus_cha %></p>
+						<a href="/list/head?p=true&pid=<%= player.player_id %>" class="card-link float-end">Pick</a>
 					</div>
 				</div>
 			</div>
@@ -57,6 +58,7 @@
 						<p class="card-text mb-0">Dexterity: <%= player.player_equ[1].bonus_dex %></p>
 						<p class="card-text mb-0">Intelligence: <%= player.player_equ[1].bonus_int %></p>
 						<p class="card-text mb-0">Charisma: <%= player.player_equ[1].bonus_cha %></p>
+						<a href="/list/body?p=true&pid=<%= player.player_id %>" class="card-link float-end">Pick</a>
 					</div>
 				</div>
 			</div>
@@ -68,6 +70,7 @@
 						<p class="card-text mb-0">Dexterity: <%= player.player_equ[3].bonus_dex %></p>
 						<p class="card-text mb-0">Intelligence: <%= player.player_equ[3].bonus_int %></p>
 						<p class="card-text mb-0">Charisma: <%= player.player_equ[3].bonus_cha %></p>
+						<a href="/list/hand?p=true&pid=<%= player.player_id %>" class="card-link float-end">Pick</a>
 					</div>
 				</div>
 			</div>
@@ -81,6 +84,7 @@
 						<p class="card-text mb-0">Dexterity: <%= player.player_equ[2].bonus_dex %></p>
 						<p class="card-text mb-0">Intelligence: <%= player.player_equ[2].bonus_int %></p>
 						<p class="card-text mb-0">Charisma: <%= player.player_equ[2].bonus_cha %></p>
+						<a href="/list/leg?p=true&pid=<%= player.player_id %>" class="card-link float-end">Pick</a>
 					</div>
 				</div>
 			</div>
@@ -92,11 +96,11 @@
 						<p class="card-text mb-0">Dexterity: <%= player.player_equ[4].bonus_dex %></p>
 						<p class="card-text mb-0">Intelligence: <%= player.player_equ[4].bonus_int %></p>
 						<p class="card-text mb-0">Charisma: <%= player.player_equ[4].bonus_cha %></p>
+						<a href="/list/feet?p=true&pid=<%= player.player_id %>" class="card-link float-end">Pick</a>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
-<script type="text/javascript" src="/static/js/test.js"></script>
 <%- include ('partials/foot') %>

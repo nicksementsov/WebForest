@@ -21,6 +21,19 @@ app.get('/newplayer/', (req, res) => {
 	res.render('newplayer',{title: 'Create New Player'});
 });
 
+app.post('/alterplayer', (req, res) => {
+	const ourPlayerID = parseInt(req.body.plID);
+	const ourItemID = parseInt(req.body.eqID);
+	const ourSlot = req.body.eqSlot;
+	db_manager.modify_player_equipment(ourPlayerID, ourItemID, ourSlot, (err, result) => {
+		if (err) {
+			console.log(err);
+		} else {
+			res.redirect(301, `/player/${ourPlayerID}`);
+		}
+	});
+});
+
 app.get('/player/:player_id', (req, res) => {
 	equipment_slots = 
 	[
@@ -45,6 +58,7 @@ app.get('/player/:player_id', (req, res) => {
 			});
 		} else {
 			viewPlayer = {
+				player_id: ourPlayer[0].player_id,
 				player_name: ourPlayer[0].player_name.trim(),
 				player_level: ourPlayer[0].player_level,
 				class_name: ourPlayer[1].class_name.trim(),
@@ -98,12 +112,18 @@ app.post('/additem', (req, res) => {
 
 app.get('/list/:category', (req, res) => {
 	const { category } = req.params;
+	var picking = false;
+	var ourPlayer = 0;
+	if (req.query.p === 'true') {
+		picking = true;
+		ourPlayer = parseInt(req.query.pid);
+	}
 	db_manager.list_equipment(category, (err, result) => {
 		if (err) {
 			console.log(err);
 		} else {
 			const pageTitle = `${category} Equipment List`
-			res.render('tablelist', {title: pageTitle, slot: category, equipment: result});
+			res.render('tablelist', {title: pageTitle, slot: category, equipment: result, picking: picking, ourPlayer: ourPlayer});
 		}
 	});
 });

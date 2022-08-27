@@ -7,6 +7,7 @@ module.exports =
 	list_equipment,
 	add_equipment,
 	find_player_equipment,
+	modify_player_equipment,
 	find_player, 
 	find_class,
 	list_players
@@ -43,6 +44,17 @@ function list_equipment(equipment_cat, callBack) {
 			failure: callBack(err, null);
 		} else {
 			success: callBack(null, res.rows);
+		}
+	});
+}
+
+function modify_player_equipment(player_id, equipment_id, equipment_slot, callBack) {
+	const query = `UPDATE player_equipment SET ${equipment_slot} = ${equipment_id} WHERE owner_id = ${player_id}`;
+	ofor_db.query(query, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res);
 		}
 	});
 }
