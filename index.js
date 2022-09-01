@@ -34,8 +34,9 @@ app.post('/alterplayer', (req, res) => {
 	});
 });
 
-app.get('/player/:player_id', (req, res) => {
-	equipment_slots = 
+// Builds a full player including stats and equipment
+function build_player(player_id, callBack) {
+	var equipment_slots = 
 	[
 		"head",
 		"body",
@@ -43,17 +44,18 @@ app.get('/player/:player_id', (req, res) => {
 		"hand",
 		"feet"
 	];
-	ourPlayer = []
 	equipment = [];
+	var ourPlayer = [];
+	var viewPlayer = [];
 
-	function get_equipment(equipment, onSlot) {
+	function get_equipment(onSlot) {
 		if (onSlot < equipment_slots.length) {
 			db_manager.find_equipment(ourPlayer[2][equipment_slots[onSlot]], equipment_slots[onSlot], (err, result) => {
 				if (err) {
-					console.log(err);
+					callBack(err, null);
 				} else {
 					equipment.push(result);
-					get_equipment(equipment, onSlot + 1);
+					get_equipment(onSlot + 1);
 				}
 			});
 		} else {
@@ -74,29 +76,39 @@ app.get('/player/:player_id', (req, res) => {
 				viewPlayer.player_int += equipmentItem.bonus_int;
 				viewPlayer.player_cha += equipmentItem.bonus_cha;
 			}
-			res.render('viewplayer', {title: "View Player", player: viewPlayer});
+			callBack(null, viewPlayer);
 		}
 	}
 
-	const { player_id } = req.params;
 	db_manager.find_player(parseInt(player_id), (err, result) => {
 		if (err) {
-			console.log(err)
+			callBack(err, null);
 		} else {
 			db_manager.find_class(result.player_class, (classErr, classResult) => {
 				if (classErr) {
-					console.log(classErr);
+					callBack(err, null);
 				} else {
 					db_manager.find_player_equipment(parseInt(player_id), (eqErr, eqResult) => {
 						ourPlayer.push(result);
 						ourPlayer.push(classResult);
 						ourPlayer.push(eqResult);
-						get_equipment(equipment, 0);
+						get_equipment(0);
 					});
 				}
 			});
 		}
-		
+	});
+
+}
+
+app.get('/player/:player_id', (req, res) => {
+	const { player_id } = req.params;
+	build_player(player_id, (err, result) => {
+		if (err) {
+			console.log(err);
+		} else {
+			res.render('viewplayer', {title: result.player_name, player: result});
+		}
 	});
 });
 
@@ -147,6 +159,15 @@ app.get('/players', (req, res) => {
 			res.render('playerlist', {title: 'Player List', players: ourPlayers});
 		}
 	});
+});
+
+app.post('/login', (req, res) => {
+	console.log(req.body);
+	res.redirect(301, '/login');
+});
+
+app.get('/login', (req, res) => {
+	res.render('login', {title: "Login"});
 });
 
 app.get('/', (req, res) => {
