@@ -10,7 +10,10 @@ module.exports =
 	modify_player_equipment,
 	find_player, 
 	find_class,
-	list_players
+	list_players,
+	// new
+	list_characters,
+	find_user_by_email
 };
 
 function add_equipment(equipment_cat, eqData, callBack) {
@@ -98,3 +101,30 @@ function list_players(callBack) {
 		}
 	});
 }
+
+// NEW
+function list_characters(user_id, callBack) {
+	const query = "SELECT character_name, character_level, class_name FROM characters INNER JOIN classes ON characters.class_id = classes.class_id WHERE characters.user_id = $1";
+	const values = [user_id];
+	ofor_db.query(query, values, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+ 		} else {
+ 			success: callBack(null, res);
+ 		}
+	});
+}
+
+// NEW
+function find_user_by_email(user_email, callBack) {
+	ofor_db.query("SELECT user_id FROM users WHERE user_email = $1", [user_email], (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res);
+		}
+	});
+}
+
+
+

@@ -98,7 +98,6 @@ function build_player(player_id, callBack) {
 			});
 		}
 	});
-
 }
 
 app.get('/player/:player_id', (req, res) => {
@@ -162,8 +161,20 @@ app.get('/players', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-	console.log(req.body);
-	res.redirect(301, '/login');
+	db_manager.find_user_by_email(req.body.loginEmail, (err, result) => {
+		if (err) {
+			console.log(err)
+		} else {
+			db_manager.list_characters(result.rows[0].user_id, (charErr, charRes) => {
+				if (charErr) {
+					console.log(charErr);
+				} else {
+					console.log(charRes.rows);
+					res.redirect(301, '/login');
+				}
+			});
+		}
+	});
 });
 
 app.get('/login', (req, res) => {
