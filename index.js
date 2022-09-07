@@ -1,11 +1,13 @@
 const path = require("path");
 const express = require("express");
+const cookieParser = require("cookie-parser")
 const db_manager = require("./ofor_db");
 
 const app = express();
 const PORT = 8080;
 
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use('/static', express.static(path.join(__dirname, "/static")));
 app.use('/js', express.static(path.join(__dirname, '/js')));
@@ -16,6 +18,15 @@ app.use('/js', express.static(path.join(__dirname, '/node_modules/@popperjs/core
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
+
+var equipment_slots = 
+[
+	"head", 
+	"body", 
+	"leg", 
+	"hand", 
+	"feet"
+];
 
 app.get('/newplayer/', (req, res) => {
 	res.render('newplayer',{title: 'Create New Player'});
@@ -36,14 +47,6 @@ app.post('/alterplayer', (req, res) => {
 
 // Builds a full player including stats and equipment
 function build_player(player_id, callBack) {
-	var equipment_slots = 
-	[
-		"head",
-		"body",
-		"leg",
-		"hand",
-		"feet"
-	];
 	equipment = [];
 	var ourPlayer = [];
 	var viewPlayer = [];
@@ -160,29 +163,63 @@ app.get('/players', (req, res) => {
 	});
 });
 
+// NEW
+
+app.get('/characters/:charID', (req, res) => {
+	const { charID } = req.params;
+	var loggedIn = (req.cookies.userID && req.cookies.userID != -1);
+	if (loggedIn) {
+		db_manager.find_character_by_id(charID, (err, charResult) => {
+			console.log(charResult);
+			db_manager.find_class(charResult.class_id, (classErr, classResult) =>{
+				console.log(classResult);
+				db_manager.find_character_equipment(charID, (eqErr, eqResult) =>{
+					console.log(eqResult);
+					for (var i = 0; i < equipment_slots.length; i++) {
+						console.log(`${equipment_slots[i]} -- ${eqResult[equipment_slots[i]]}`);
+					}
+					db_manager.find_equipment_item(eqResult[equipment_slots[0]], 0, (itemErr, itemResult) => {
+						console.log(itemResult);
+						res.redirect(302, '/');
+					});
+				});
+			});
+		});
+	} else {
+		res.redirect(302, '/login');
+	}
+});
+
 app.post('/login', (req, res) => {
 	db_manager.find_user_by_email(req.body.loginEmail, (err, result) => {
 		if (err) {
 			console.log(err)
 		} else {
-			db_manager.list_characters(result.rows[0].user_id, (charErr, charRes) => {
-				if (charErr) {
-					console.log(charErr);
-				} else {
-					console.log(charRes.rows);
-					res.redirect(301, '/login');
-				}
-			});
+			res.cookie('userID', result.user_id);
+			res.redirect(302, '/');
 		}
 	});
 });
 
 app.get('/login', (req, res) => {
-	res.render('login', {title: "Login"});
+	if (req.cookies.userID && req.cookies.userID != -1) {
+		res.redirect(307, '/');
+	} else {
+		res.render('login', {title: "Login"});
+	}
 });
 
 app.get('/', (req, res) => {
-	res.render('index', {title: "Home"});
+	var loggedIn = (req.cookies.userID && req.cookies.userID != -1);
+	if (loggedIn) {
+		db_manager.find_user_by_id(req.cookies.userID, (err, result) => {
+			db_manager.list_characters(req.cookies.userID, (charErr, charResult) => {
+				res.render('index', {title: "Home", loggedIn: true, user: result, characters: charResult});
+			});
+		});
+	} else {
+		res.render('index', {title: "Home", loggedIn: false});
+	}
 });
 
 app.listen(PORT, () => {

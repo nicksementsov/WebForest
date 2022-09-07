@@ -12,9 +12,22 @@ module.exports =
 	find_class,
 	list_players,
 	// new
+	find_equipment_item,
+	find_character_equipment,
 	list_characters,
-	find_user_by_email
+	find_character_by_id,
+	find_user_by_email,
+	find_user_by_id
 };
+
+var equipment_slots = 
+[
+	"head", 
+	"body", 
+	"leg", 
+	"hand", 
+	"feet"
+];
 
 function add_equipment(equipment_cat, eqData, callBack) {
 	const query = `INSERT INTO ${equipment_cat}_equipment (equipment_name, bonus_str, bonus_dex, bonus_int, bonus_cha) VALUES ($1, $2, $3, $4, $5)`;
@@ -103,28 +116,71 @@ function list_players(callBack) {
 }
 
 // NEW
+
+function find_equipment_item(itemID, category, callBack) {
+	const query = `SELECT * FROM ${equipment_slots[category]}_equipment WHERE equipment_id = $1`;
+	const values = [itemID];
+	ofor_db.query(query, values, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res.rows[0]);
+		}
+	});
+}
+
+function find_character_equipment(charID, callBack) {
+	const query = "SELECT * FROM character_equipment WHERE character_id = $1";
+	values = [charID];
+	ofor_db.query(query, values, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res.rows[0]);
+		}
+	});
+}
+
+function find_character_by_id(charID, callBack) {
+	const query = "SELECT * FROM characters WHERE character_id = $1";
+	const values = [charID];
+	ofor_db.query(query, values, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res.rows[0]);
+		}
+	});
+}
+
 function list_characters(user_id, callBack) {
-	const query = "SELECT character_name, character_level, class_name FROM characters INNER JOIN classes ON characters.class_id = classes.class_id WHERE characters.user_id = $1";
+	const query = "SELECT * FROM characters INNER JOIN classes ON characters.class_id = classes.class_id WHERE characters.user_id = $1";
 	const values = [user_id];
 	ofor_db.query(query, values, (err, res) => {
 		if (err) {
 			failure: callBack(err, null);
  		} else {
- 			success: callBack(null, res);
+ 			success: callBack(null, res.rows);
  		}
 	});
 }
 
-// NEW
 function find_user_by_email(user_email, callBack) {
 	ofor_db.query("SELECT user_id FROM users WHERE user_email = $1", [user_email], (err, res) => {
 		if (err) {
 			failure: callBack(err, null);
 		} else {
-			success: callBack(null, res);
+			success: callBack(null, res.rows[0]);
 		}
 	});
 }
 
-
-
+function find_user_by_id(userID, callBack) {
+	ofor_db.query("SELECT * FROM users WHERE user_id = $1", [userID], (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res.rows[0]);
+		}
+	});
+}
