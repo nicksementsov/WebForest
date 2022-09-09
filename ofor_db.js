@@ -20,26 +20,7 @@ module.exports =
 	find_user_by_id
 };
 
-var equipment_slots = 
-[
-	"head", 
-	"body", 
-	"leg", 
-	"hand", 
-	"feet"
-];
 
-function add_equipment(equipment_cat, eqData, callBack) {
-	const query = `INSERT INTO ${equipment_cat}_equipment (equipment_name, bonus_str, bonus_dex, bonus_int, bonus_cha) VALUES ($1, $2, $3, $4, $5)`;
-	values = [eqData.eqName, eqData.bonStr, eqData.bonDex, eqData.bonInt, eqData.bonCha];
-	ofor_db.query(query, values, (err, res) => {
-		if (err) {
-			failure: callBack(err, null);
-		} else {
-			success: callBack(null, res.rows);
-		}
-	});
-}
 
 function find_equipment(equipment_id, equipment_cat, callBack) {
 	const query = `SELECT * FROM ${equipment_cat}_equipment WHERE ${equipment_cat}_equipment_id = $1`;
@@ -49,17 +30,6 @@ function find_equipment(equipment_id, equipment_cat, callBack) {
 			failure: callBack(err, null);
 		} else {
 			success: callBack(null, res.rows[0]);
-		}
-	});
-}
-
-function list_equipment(equipment_cat, callBack) {
-	const query = `SELECT * FROM ${equipment_cat}_equipment`
-	ofor_db.query(query, (err, res) => {
-		if (err) {
-			failure: callBack(err, null);
-		} else {
-			success: callBack(null, res.rows);
 		}
 	});
 }
@@ -116,6 +86,40 @@ function list_players(callBack) {
 }
 
 // NEW
+
+var equipment_slots = 
+[
+	"head", 
+	"body", 
+	"leg", 
+	"hand", 
+	"feet",
+	"arms",
+	"arms"
+];
+
+function add_equipment(equipment_cat, eqData, callBack) {
+	const query = `INSERT INTO ${equipment_cat}_equipment (equipment_name, equipment_level, equipment_str, equipment_int, equipment_dex, equipment_cha) VALUES ($1, $2, $3, $4, $5, $6)`;
+	values = [eqData.eqName, eqData.eqLevel, eqData.eqStr, eqData.eqDex, eqData.eqInt, eqData.eqCha];
+	ofor_db.query(query, values, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res.rows);
+		}
+	});
+}
+
+function list_equipment(equipment_cat, callBack) {
+	const query = `SELECT * FROM ${equipment_cat}_equipment`
+	ofor_db.query(query, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res.rows);
+		}
+	});
+}
 
 function find_equipment_item(itemID, category, callBack) {
 	const query = `SELECT * FROM ${equipment_slots[category]}_equipment WHERE equipment_id = $1`;

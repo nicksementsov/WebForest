@@ -1,0 +1,106 @@
+<%- include ('partials/head') %>
+<%- include ('partials/navbar') %>
+<div class="row">
+	<div class="col-3 col-md-6">
+		<img src="/static/img/<%= charClass.class_name %>_lg.png" class="img-fluid" alt="warrior">
+	</div>
+	<div class="col-9 col-md-6">
+		<h2><%= character.character_name %></h2>
+		<h4>Level <%= character.character_level %> <%= charClass.class_name %></h4>
+		<div class="row">
+			<div class="col-4 col-lg-3 float-end p-0">
+				<p class="float-end">Strength:</p>
+			</div>
+			<div class="col-2 col-lg-1 p-r-0">
+				<p><%= stats.str %></p>
+			</div>
+			<div class="col-4 col-lg-3 p-0">
+				<p class="float-end">Intelligence:</p>
+			</div>
+			<div class="col-2 col-lg-1">
+				<p><%= stats.int %></p>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-4 col-lg-3 float-end p-0">
+				<p class="float-end">Dexterity:</p>
+			</div>
+			<div class="col-2 col-lg-1 p-r-0">
+				<p><%= stats.dex %></p>
+			</div>
+			<div class="col-4 col-lg-3 p-0">
+				<p class="float-end">Charisma:</p>
+			</div>
+			<div class="col-2 col-lg-1">
+				<p><%= stats.cha %></p>
+			</div>
+		</div>
+		<div class="row mb-2">
+			<div class="col-6">
+				<div class="card" id="headEquCard">
+					<div class="card-body">
+						<h5 class="card-title mb-3"><%= equipment[0].equipment_name.trim() %></h5>
+						<p class="card-text mb-0">Strength: <%= equipment[0].equipment_str %></p>
+						<p class="card-text mb-0">Dexterity: <%= equipment[0].equipment_dex %></p>
+						<p class="card-text mb-0">Intelligence: <%= equipment[0].equipment_int %></p>
+						<p class="card-text mb-0">Charisma: <%= equipment[0].equipment_cha %></p>
+						<a href="/list/head?p=true&pid=<%= character.character_id %>" class="card-link float-end">Pick</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row mb-2">
+			<div class="col-6">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title mb-3"><%= equipment[1].equipment_name.trim() %></h5>
+						<p class="card-text mb-0">Strength: <%= equipment[1].equipment_str %></p>
+						<p class="card-text mb-0">Dexterity: <%= equipment[1].equipment_dex %></p>
+						<p class="card-text mb-0">Intelligence: <%= equipment[1].equipment_int %></p>
+						<p class="card-text mb-0">Charisma: <%= equipment[1].equipment_cha %></p>
+						<a href="/list/body?p=true&pid=<%= character.character_id %>" class="card-link float-end">Pick</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title mb-3"><%= equipment[3].equipment_name.trim() %></h5>
+						<p class="card-text mb-0">Strength: <%= equipment[3].equipment_str %></p>
+						<p class="card-text mb-0">Dexterity: <%= equipment[3].equipment_dex %></p>
+						<p class="card-text mb-0">Intelligence: <%= equipment[3].equipment_int %></p>
+						<p class="card-text mb-0">Charisma: <%= equipment[3].equipment_cha %></p>
+						<a href="/list/hand?p=true&pid=<%= character.character_id %>" class="card-link float-end">Pick</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-6">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title mb-3"><%= equipment[2].equipment_name.trim() %></h5>
+						<p class="card-text mb-0">Strength: <%= equipment[2].equipment_str %></p>
+						<p class="card-text mb-0">Dexterity: <%= equipment[2].equipment_dex %></p>
+						<p class="card-text mb-0">Intelligence: <%= equipment[2].equipment_int %></p>
+						<p class="card-text mb-0">Charisma: <%= equipment[2].equipment_cha %></p>
+						<a href="/list/leg?p=true&pid=<%= character.character_id %>" class="card-link float-end">Pick</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title mb-3"><%= equipment[4].equipment_name.trim() %></h5>
+						<p class="card-text mb-0">Strength: <%= equipment[4].equipment_str %></p>
+						<p class="card-text mb-0">Dexterity: <%= equipment[4].equipment_dex %></p>
+						<p class="card-text mb-0">Intelligence: <%= equipment[4].equipment_int %></p>
+						<p class="card-text mb-0">Charisma: <%= equipment[4].equipment_cha %></p>
+						<a href="/list/feet?p=true&pid=<%= character.character_id %>" class="card-link float-end">Pick</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<%- include ('partials/foot') %>

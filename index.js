@@ -25,7 +25,9 @@ var equipment_slots =
 	"body", 
 	"leg", 
 	"hand", 
-	"feet"
+	"feet",
+	"arms",
+	"arms"
 ];
 
 app.get('/newplayer/', (req, res) => {
@@ -45,73 +47,38 @@ app.post('/alterplayer', (req, res) => {
 	});
 });
 
-// Builds a full player including stats and equipment
-function build_player(player_id, callBack) {
-	equipment = [];
-	var ourPlayer = [];
-	var viewPlayer = [];
-
-	function get_equipment(onSlot) {
-		if (onSlot < equipment_slots.length) {
-			db_manager.find_equipment(ourPlayer[2][equipment_slots[onSlot]], equipment_slots[onSlot], (err, result) => {
-				if (err) {
-					callBack(err, null);
-				} else {
-					equipment.push(result);
-					get_equipment(onSlot + 1);
-				}
-			});
-		} else {
-			viewPlayer = {
-				player_id: ourPlayer[0].player_id,
-				player_name: ourPlayer[0].player_name.trim(),
-				player_level: ourPlayer[0].player_level,
-				class_name: ourPlayer[1].class_name.trim(),
-				player_str: 0 + ourPlayer[1].base_str,
-				player_int: 0 + ourPlayer[1].base_int,
-				player_dex: 0 + ourPlayer[1].base_dex,
-				player_cha: 0 + ourPlayer[1].base_cha,
-				player_equ: equipment
-			}
-			for (let equipmentItem of equipment) {
-				viewPlayer.player_str += equipmentItem.bonus_str;
-				viewPlayer.player_dex += equipmentItem.bonus_dex;
-				viewPlayer.player_int += equipmentItem.bonus_int;
-				viewPlayer.player_cha += equipmentItem.bonus_cha;
-			}
-			callBack(null, viewPlayer);
-		}
-	}
-
-	db_manager.find_player(parseInt(player_id), (err, result) => {
-		if (err) {
-			callBack(err, null);
-		} else {
-			db_manager.find_class(result.player_class, (classErr, classResult) => {
-				if (classErr) {
-					callBack(err, null);
-				} else {
-					db_manager.find_player_equipment(parseInt(player_id), (eqErr, eqResult) => {
-						ourPlayer.push(result);
-						ourPlayer.push(classResult);
-						ourPlayer.push(eqResult);
-						get_equipment(0);
-					});
-				}
-			});
-		}
-	});
-}
-
-app.get('/player/:player_id', (req, res) => {
-	const { player_id } = req.params;
-	build_player(player_id, (err, result) => {
+app.get('/players', (req, res) => {
+	db_manager.list_players((err, result) => {
 		if (err) {
 			console.log(err);
 		} else {
-			res.render('viewplayer', {title: result.player_name, player: result});
+			var ourPlayers = [];
+			for (let player of result) 
+			{
+				ourPlayers.push(
+					{
+						id: player.player_id
+						, name: player.player_name.trim()
+						, level: player.player_level
+						, class: player.class_name
+					});
+			}
+			res.render('playerlist', {title: 'Player List', players: ourPlayers});
 		}
 	});
+});
+
+// NEW
+
+app.get('/characters', (req, res) => {
+	var loggedIn = (req.cookies.userID && req.cookies.userID != -1);
+	if (loggedIn) {
+		db_manager.list_characters(req.cookies.userID, (charErr, charResult) => {
+			res.render('characterlist', {title: 'Your Characters', characters: charResult});
+		});
+	} else {
+		res.redirect(302, '/login');
+	}
 });
 
 app.post('/additem', (req, res) => {
@@ -142,45 +109,57 @@ app.get('/list/:category', (req, res) => {
 	});
 });
 
-app.get('/players', (req, res) => {
-	db_manager.list_players((err, result) => {
-		if (err) {
-			console.log(err);
-		} else {
-			var ourPlayers = [];
-			for (let player of result) 
-			{
-				ourPlayers.push(
-					{
-						id: player.player_id
-						, name: player.player_name.trim()
-						, level: player.player_level
-						, class: player.class_name
-					});
-			}
-			res.render('playerlist', {title: 'Player List', players: ourPlayers});
-		}
-	});
-});
-
-// NEW
-
 app.get('/characters/:charID', (req, res) => {
+	function find_equipment_items(onSlot, eqItems, callBack) {
+		if (onSlot < equipment_slots.length) {
+			db_manager.find_equipment_item(eqItems[onSlot], onSlot, (err, result) => {
+				if (err) {
+					callBack(err, null);
+				} else {
+					equipment.push(result);
+					find_equipment_items(onSlot + 1, eqItems, callBack);
+				}
+			});
+		} else {
+			callBack(null, 'test');
+		}
+	}
+	var equipment = []
 	const { charID } = req.params;
 	var loggedIn = (req.cookies.userID && req.cookies.userID != -1);
 	if (loggedIn) {
 		db_manager.find_character_by_id(charID, (err, charResult) => {
-			console.log(charResult);
 			db_manager.find_class(charResult.class_id, (classErr, classResult) =>{
-				console.log(classResult);
 				db_manager.find_character_equipment(charID, (eqErr, eqResult) =>{
-					console.log(eqResult);
-					for (var i = 0; i < equipment_slots.length; i++) {
-						console.log(`${equipment_slots[i]} -- ${eqResult[equipment_slots[i]]}`);
-					}
-					db_manager.find_equipment_item(eqResult[equipment_slots[0]], 0, (itemErr, itemResult) => {
-						console.log(itemResult);
-						res.redirect(302, '/');
+					find_equipment_items(0, [
+						eqResult.head,
+						eqResult.body,
+						eqResult.leg,
+						eqResult.hand, 
+						eqResult.feet,
+						eqResult.left_hand,
+						eqResult.right_hand
+						], (eqFindErr, eqFindRes) => {
+						var stats = {
+							str: classResult.class_str,
+							int: classResult.class_int,
+							dex: classResult.class_dex,
+							cha: classResult.class_cha
+						}
+						for (let equipmentItem of equipment) {
+							stats.str += parseInt(equipmentItem.equipment_str),
+							stats.int += equipmentItem.equipment_int,
+							stats.dex += equipmentItem.equipment_dex,
+							stats.cha += equipmentItem.equipment_cha
+						}
+						res.render('viewcharacter', 
+							{
+								title: charResult.character_name, 
+								character: charResult, 
+								charClass: classResult,
+								stats: stats, 
+								equipment: equipment
+							});
 					});
 				});
 			});

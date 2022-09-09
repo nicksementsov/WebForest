@@ -1,0 +1,23 @@
+<%- include ('partials/head') %>
+<%- include ('partials/navbar') %>
+	<div class="row">
+		<div class="col">
+			<h1>Character List</h1>
+		</div>
+		<div class = "col">
+			<a class="btn btn-primary float-end m-2" href="/newcharacter/">Create New character</a>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			<ul class="list-group">
+				<% for (let character of characters) { %>
+					<li class="list-group-item">
+						<%= character.character_name.trim() %> - level <%= character.character_level %> <%= character.class_name %>
+						<a class="btn btn-primary float-end" href="/character/<%= character.id %>">View</a>
+					</li>
+				<% } %>
+			</ul>
+		</div>
+	</div>
+<%- include ('partials/foot') %>
