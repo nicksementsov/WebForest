@@ -14,7 +14,7 @@
 				<% for (let character of characters) { %>
 					<li class="list-group-item">
 						<%= character.character_name.trim() %> - level <%= character.character_level %> <%= character.class_name %>
-						<a class="btn btn-primary float-end" href="/character/<%= character.id %>">View</a>
+						<a class="btn btn-primary float-end" href="/characters/<%= character.character_id %>">View</a>
 					</li>
 				<% } %>
 			</ul>
