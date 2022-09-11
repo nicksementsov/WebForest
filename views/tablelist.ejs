@@ -14,7 +14,7 @@
 			</thead>
 			<tbody>
 				<% for (let item of equipment) {%>
-					<form class="form-horizontal" action="/alterplayer" method="POST">
+					<form class="form-horizontal" action="/altercharacter" method="POST">
 						<tr>
 							<!-- <th scope="row"><%= item.equipment_id %></th> -->
 							<th scope="row"><%= item.equipment_name.trim() %></th>
@@ -25,10 +25,10 @@
 							<td><%= item.equipment_cha %></td>
 							<% if (picking) { %>
 								<td>
-									<input type="hidden" id="playerID" name="plID" value=<%= ourPlayer %>>
-									<input type="hidden" id="equipmentID" name="eqID" value=<%= item[`${slot}_equipment_id`] %>>
+									<input type="hidden" id="playerID" name="chID" value=<%= ourPlayer %>>
+									<input type="hidden" id="equipmentID" name="eqID" value=<%= item.equipment_id %>>
 									<input type="hidden" id="equipmentSlot" name="eqSlot" value=<%= slot %>>
-									<button type="submit" class="btn btn-primary" href="/alterplayer">Choose</button>
+									<button type="submit" class="btn btn-primary" href="/altercharacter">Choose</button>
 								</td>
 							<% } %>
 						</tr>

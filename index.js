@@ -7,7 +7,7 @@ const app = express();
 const PORT = 8080;
 
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieParser(process.env.SERVSECRET));
 
 app.use('/static', express.static(path.join(__dirname, "/static")));
 app.use('/js', express.static(path.join(__dirname, '/js')));
@@ -30,51 +30,41 @@ var equipment_slots =
 	"arms"
 ];
 
-app.get('/newplayer/', (req, res) => {
-	res.render('newplayer',{title: 'Create New Player'});
+function user_logged_in(req) {
+	if (req.signedCookies.userID && req.signedCookies.userID != -1) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+app.get('/newcharacter', (req, res) => {
+	if (user_logged_in(req)) {
+		res.render('newcharacter',{title: 'Create New Character'});
+	} else {
+		res.redirect(302, '/login');
+	}
 });
 
-app.post('/alterplayer', (req, res) => {
-	const ourPlayerID = parseInt(req.body.plID);
+app.post('/altercharacter', (req, res) => {
+	const ourCharID = parseInt(req.body.chID);
 	const ourItemID = parseInt(req.body.eqID);
 	const ourSlot = req.body.eqSlot;
-	db_manager.modify_player_equipment(ourPlayerID, ourItemID, ourSlot, (err, result) => {
+	db_manager.modify_character_equipment(ourCharID, ourItemID, ourSlot, (err, result) => {
 		if (err) {
 			console.log(err);
 		} else {
-			res.redirect(301, `/player/${ourPlayerID}`);
+			res.redirect(301, `/characters/${ourCharID}`);
 		}
 	});
 });
-
-app.get('/players', (req, res) => {
-	db_manager.list_players((err, result) => {
-		if (err) {
-			console.log(err);
-		} else {
-			var ourPlayers = [];
-			for (let player of result) 
-			{
-				ourPlayers.push(
-					{
-						id: player.player_id
-						, name: player.player_name.trim()
-						, level: player.player_level
-						, class: player.class_name
-					});
-			}
-			res.render('playerlist', {title: 'Player List', players: ourPlayers});
-		}
-	});
-});
-
-// NEW
 
 app.get('/characters', (req, res) => {
-	var loggedIn = (req.cookies.userID && req.cookies.userID != -1);
-	if (loggedIn) {
-		db_manager.list_characters(req.cookies.userID, (charErr, charResult) => {
-			res.render('characterlist', {title: 'Your Characters', characters: charResult});
+	if (user_logged_in(req)) {
+		db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
+			res.render('characterlist', {title: 'Your Characters', 
+				loggedIn: user_logged_in(req), 
+				characters: charResult});
 		});
 	} else {
 		res.redirect(302, '/login');
@@ -104,7 +94,13 @@ app.get('/list/:category', (req, res) => {
 			console.log(err);
 		} else {
 			const pageTitle = `${category} Equipment List`
-			res.render('tablelist', {title: pageTitle, slot: category, equipment: result, picking: picking, ourPlayer: ourPlayer});
+			res.render('tablelist', {
+				title: pageTitle,
+				loggedIn: user_logged_in(req),
+				slot: category, 
+				equipment: result, 
+				picking: picking, 
+				ourPlayer: ourPlayer});
 		}
 	});
 });
@@ -126,8 +122,7 @@ app.get('/characters/:charID', (req, res) => {
 	}
 	var equipment = []
 	const { charID } = req.params;
-	var loggedIn = (req.cookies.userID && req.cookies.userID != -1);
-	if (loggedIn) {
+	if (user_logged_in(req)) {
 		db_manager.find_character_by_id(charID, (err, charResult) => {
 			db_manager.find_class(charResult.class_id, (classErr, classResult) =>{
 				db_manager.find_character_equipment(charID, (eqErr, eqResult) =>{
@@ -155,6 +150,7 @@ app.get('/characters/:charID', (req, res) => {
 						res.render('viewcharacter', 
 							{
 								title: charResult.character_name, 
+								loggedIn: user_logged_in(req),
 								character: charResult, 
 								charClass: classResult,
 								stats: stats, 
@@ -169,30 +165,42 @@ app.get('/characters/:charID', (req, res) => {
 	}
 });
 
+app.get('/logout', (req, res) => {
+	if (user_logged_in(req)) {
+		res.cookie('userID', -1, {signed: true});
+		res.redirect(302, 'login');
+	} else {
+		res.redirect(302, 'login');
+	}
+});
+
 app.post('/login', (req, res) => {
 	db_manager.find_user_by_email(req.body.loginEmail, (err, result) => {
 		if (err) {
 			console.log(err)
 		} else {
-			res.cookie('userID', result.user_id);
-			res.redirect(302, '/');
+			if (result) {
+				res.cookie('userID', result.user_id, {signed: true});
+				res.redirect(302, '/');
+			} else {
+				res.redirect(302, 'login');
+			}
 		}
 	});
 });
 
 app.get('/login', (req, res) => {
-	if (req.cookies.userID && req.cookies.userID != -1) {
+	if (user_logged_in(req)) {
 		res.redirect(307, '/');
 	} else {
-		res.render('login', {title: "Login"});
+		res.render('login', {title: "Login", loggedIn: user_logged_in(req)});
 	}
 });
 
 app.get('/', (req, res) => {
-	var loggedIn = (req.cookies.userID && req.cookies.userID != -1);
-	if (loggedIn) {
-		db_manager.find_user_by_id(req.cookies.userID, (err, result) => {
-			db_manager.list_characters(req.cookies.userID, (charErr, charResult) => {
+	if (user_logged_in(req)) {
+		db_manager.find_user_by_id(req.signedCookies.userID, (err, result) => {
+			db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
 				res.render('index', {title: "Home", loggedIn: true, user: result, characters: charResult});
 			});
 		});
