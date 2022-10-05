@@ -38,9 +38,24 @@ function user_logged_in(req) {
 	}
 }
 
+app.post('/newcharacter', (req, res) => {
+	console.log(req.body);
+	res.redirect(302, '/');
+});
+
 app.get('/newcharacter', (req, res) => {
 	if (user_logged_in(req)) {
-		res.render('newcharacter',{title: 'Create New Character'});
+		db_manager.find_user_by_id(req.signedCookies.userID, (err, result) => {
+			if (err) {
+				res.redirect(302, '/');
+			} else {
+				db_manager.list_classes((classErr, classResult) => {
+					console.log(classResult);
+					res.render('newcharacter',{title: 'Create New Character', 
+						loggedIn: true, classes: classResult});
+				});
+			}
+		});
 	} else {
 		res.redirect(302, '/login');
 	}
@@ -63,7 +78,7 @@ app.get('/characters', (req, res) => {
 	if (user_logged_in(req)) {
 		db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
 			res.render('characterlist', {title: 'Your Characters', 
-				loggedIn: user_logged_in(req), 
+				loggedIn: true, 
 				characters: charResult});
 		});
 	} else {

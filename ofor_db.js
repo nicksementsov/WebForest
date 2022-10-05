@@ -11,6 +11,7 @@ module.exports =
 	find_equipment_item,
 	find_character_equipment,
 	find_character_by_id,
+	list_classes,
 	list_characters,
 	find_user_by_email,
 	find_user_by_id
@@ -107,6 +108,17 @@ function find_character_by_id(charID, callBack) {
 			failure: callBack(err, null);
 		} else {
 			success: callBack(null, res.rows[0]);
+		}
+	});
+}
+
+function list_classes(callBack) {
+	const query = "SELECT * FROM classes";
+	ofor_db.query(query, (err, res) => {
+		if (err) {
+			callBack(err, null);
+		} else {
+			callBack(null, res.rows);
 		}
 	});
 }
