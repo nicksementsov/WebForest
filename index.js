@@ -40,6 +40,7 @@ function user_logged_in(req) {
 
 app.post('/newcharacter', (req, res) => {
 	console.log(req.body);
+	const ourClass = parseInt(req.body.classSelection);
 	res.redirect(302, '/');
 });
 
@@ -50,7 +51,6 @@ app.get('/newcharacter', (req, res) => {
 				res.redirect(302, '/');
 			} else {
 				db_manager.list_classes((classErr, classResult) => {
-					console.log(classResult);
 					res.render('newcharacter',{title: 'Create New Character', 
 						loggedIn: true, classes: classResult});
 				});
@@ -87,7 +87,7 @@ app.get('/characters', (req, res) => {
 });
 
 app.post('/additem', (req, res) => {
-	db_manager.add_equipment(req.body.slot, req.body, (err, result) => {
+	db_manager.add_equipment(req.body.category, req.body, (err, result) => {
 		if (err) {
 			console.log(err);
 		} else {
@@ -97,12 +97,14 @@ app.post('/additem', (req, res) => {
 });
 
 app.get('/list/:category', (req, res) => {
-	const { category } = req.params;
+	var { category } = req.params;
 	var picking = false;
 	var ourPlayer = 0;
+	var ourSlot = null;
 	if (req.query.p === 'true') {
 		picking = true;
 		ourPlayer = parseInt(req.query.pid);
+		ourSlot = req.query.slot;
 	}
 	db_manager.list_equipment(category, (err, result) => {
 		if (err) {
@@ -112,7 +114,8 @@ app.get('/list/:category', (req, res) => {
 			res.render('tablelist', {
 				title: pageTitle,
 				loggedIn: user_logged_in(req),
-				slot: category, 
+				category: category, 
+				slot: ourSlot,
 				equipment: result, 
 				picking: picking, 
 				ourPlayer: ourPlayer});

@@ -37,6 +37,32 @@
 		</div>
 		<div class="row mb-2">
 			<div class="col-6">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title mb-3"><%= equipment[5].equipment_name.trim() %></h5>
+						<p class="card-text mb-0">Strength: <%= equipment[5].equipment_str %></p>
+						<p class="card-text mb-0">Dexterity: <%= equipment[5].equipment_dex %></p>
+						<p class="card-text mb-0">Intelligence: <%= equipment[5].equipment_int %></p>
+						<p class="card-text mb-0">Charisma: <%= equipment[5].equipment_cha %></p>
+						<a href="/list/arms?p=true&pid=<%= character.character_id %>&slot=left_hand" class="card-link float-end">Pick</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-6">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title mb-3"><%= equipment[6].equipment_name.trim() %></h5>
+						<p class="card-text mb-0">Strength: <%= equipment[6].equipment_str %></p>
+						<p class="card-text mb-0">Dexterity: <%= equipment[6].equipment_dex %></p>
+						<p class="card-text mb-0">Intelligence: <%= equipment[6].equipment_int %></p>
+						<p class="card-text mb-0">Charisma: <%= equipment[6].equipment_cha %></p>
+						<a href="/list/arms?p=true&pid=<%= character.character_id %>&slot=right_hand" class="card-link float-end">Pick</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row mb-2">
+			<div class="col-6">
 				<div class="card" id="headEquCard">
 					<div class="card-body">
 						<h5 class="card-title mb-3"><%= equipment[0].equipment_name.trim() %></h5>
@@ -44,7 +70,7 @@
 						<p class="card-text mb-0">Dexterity: <%= equipment[0].equipment_dex %></p>
 						<p class="card-text mb-0">Intelligence: <%= equipment[0].equipment_int %></p>
 						<p class="card-text mb-0">Charisma: <%= equipment[0].equipment_cha %></p>
-						<a href="/list/head?p=true&pid=<%= character.character_id %>" class="card-link float-end">Pick</a>
+						<a href="/list/head?p=true&pid=<%= character.character_id %>&slot=head" class="card-link float-end">Pick</a>
 					</div>
 				</div>
 			</div>
@@ -58,7 +84,7 @@
 						<p class="card-text mb-0">Dexterity: <%= equipment[1].equipment_dex %></p>
 						<p class="card-text mb-0">Intelligence: <%= equipment[1].equipment_int %></p>
 						<p class="card-text mb-0">Charisma: <%= equipment[1].equipment_cha %></p>
-						<a href="/list/body?p=true&pid=<%= character.character_id %>" class="card-link float-end">Pick</a>
+						<a href="/list/body?p=true&pid=<%= character.character_id %>&slot=body" class="card-link float-end">Pick</a>
 					</div>
 				</div>
 			</div>
@@ -70,7 +96,7 @@
 						<p class="card-text mb-0">Dexterity: <%= equipment[3].equipment_dex %></p>
 						<p class="card-text mb-0">Intelligence: <%= equipment[3].equipment_int %></p>
 						<p class="card-text mb-0">Charisma: <%= equipment[3].equipment_cha %></p>
-						<a href="/list/hand?p=true&pid=<%= character.character_id %>" class="card-link float-end">Pick</a>
+						<a href="/list/hand?p=true&pid=<%= character.character_id %>&slot=hand" class="card-link float-end">Pick</a>
 					</div>
 				</div>
 			</div>
@@ -84,7 +110,7 @@
 						<p class="card-text mb-0">Dexterity: <%= equipment[2].equipment_dex %></p>
 						<p class="card-text mb-0">Intelligence: <%= equipment[2].equipment_int %></p>
 						<p class="card-text mb-0">Charisma: <%= equipment[2].equipment_cha %></p>
-						<a href="/list/leg?p=true&pid=<%= character.character_id %>" class="card-link float-end">Pick</a>
+						<a href="/list/leg?p=true&pid=<%= character.character_id %>&slot=leg" class="card-link float-end">Pick</a>
 					</div>
 				</div>
 			</div>
@@ -96,7 +122,7 @@
 						<p class="card-text mb-0">Dexterity: <%= equipment[4].equipment_dex %></p>
 						<p class="card-text mb-0">Intelligence: <%= equipment[4].equipment_int %></p>
 						<p class="card-text mb-0">Charisma: <%= equipment[4].equipment_cha %></p>
-						<a href="/list/feet?p=true&pid=<%= character.character_id %>" class="card-link float-end">Pick</a>
+						<a href="/list/feet?p=true&pid=<%= character.character_id %>&slot=feet" class="card-link float-end">Pick</a>
 					</div>
 				</div>
 			</div>
