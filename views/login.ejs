@@ -1,25 +1,45 @@
 <%- include ('partials/head') %>
 <%- include ('partials/navbar') %>
 <div class="row">
-	<div class="col-6">
+	<div class="col-12 col-lg-6">
+		<h3>Login</h3>
 		<form action="/login" method="POST">
 			<div class="mb-3">
-				<label for="exampleInputEmail1" class="form-label">Email address</label>
-				<input type="email" class="form-control" id="exampleInputEmail1" name="loginEmail" aria-describedby="emailHelp">
+				<label for="loginEmailField" class="form-label">Email address</label>
+				<input type="email" class="form-control" id="loginEmailField" name="loginEmail" aria-describedby="emailHelp">
 			</div>
 			<div class="mb-3">
-				<label for="exampleInputPassword1" class="form-label">Password</label>
-				<input type="password" class="form-control" id="exampleInputPassword1" name="loginPassword">
+				<label for="loginPasswordField" class="form-label">Password</label>
+				<input type="password" class="form-control" id="loginPasswordField" name="loginPassword">
 			</div>
 			<div class="mb-3 form-check">
-				<input type="checkbox" class="form-check-input" id="exampleCheck1" name="keepLogin">
-				<label class="form-check-label" for="exampleCheck1">Stay Logged In</label>
+				<input type="checkbox" class="form-check-input" id="logCheck" name="keepLoginCheck">
+				<label class="form-check-label" for="logCheck">Stay Logged In</label>
 			</div>
-			<button type="submit" class="btn btn-primary">Submit</button>
+			<button type="submit" class="btn btn-primary">Log In</button>
 		</form>	
 	</div>
-	<div class="col-6">
-
+	<div class="col-12 col-lg-6">
+		<h3>Register</h3>
+		<form action="/register" method="POST">
+			<div class="mb-3">
+				<label for="regEmailField" class="form-label">Email address</label>
+				<input type="email" class="form-control" id="regEmailField" name="regEmail" aria-describedby="emailHelp">
+			</div>
+			<div class="mb-3">
+				<label for="regNameField" class="form-label">User Name</label>
+				<input type="text" class="form-control" id="regNameField" name="regName" aria-describedby="emailHelp">
+			</div>
+			<div class="mb-3">
+				<label for="regPasswordFieldOne" class="form-label">Password</label>
+				<input type="password" class="form-control" id="regPasswordFieldOne" name="regPasswordOne">
+			</div>
+			<div class="mb-3">
+				<label for="regPasswordFieldTwo" class="form-label">Confirm Password</label>
+				<input type="password" class="form-control" id="regPasswordFieldTwo" name="regPasswordTwo">
+			</div>
+			<button type="submit" class="btn btn-primary">Register</button>
+		</form>
 	</div>
 </div>
 <%- include ('partials/foot') %>

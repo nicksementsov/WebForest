@@ -1,10 +1,12 @@
 const path = require("path");
 const express = require("express");
 const cookieParser = require("cookie-parser")
+const bcrypt = require("bcrypt");
 const db_manager = require("./ofor_db");
 
 const app = express();
 const PORT = 8080;
+const saltRounds = 10;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.SERVSECRET));
@@ -91,7 +93,7 @@ app.post('/additem', (req, res) => {
 		if (err) {
 			console.log(err);
 		} else {
-			res.redirect(301, `/list/${req.body.slot}`);
+			res.redirect(301, `/list/${req.body.category}`);
 		}
 	});
 });
@@ -142,8 +144,8 @@ app.get('/characters/:charID', (req, res) => {
 	const { charID } = req.params;
 	if (user_logged_in(req)) {
 		db_manager.find_character_by_id(charID, (err, charResult) => {
-			db_manager.find_class(charResult.class_id, (classErr, classResult) =>{
-				db_manager.find_character_equipment(charID, (eqErr, eqResult) =>{
+			db_manager.find_class(charResult.class_id, (classErr, classResult) => {
+				db_manager.find_character_equipment(charID, (eqErr, eqResult) => {
 					find_equipment_items(0, [
 						eqResult.head,
 						eqResult.body,
@@ -186,9 +188,9 @@ app.get('/characters/:charID', (req, res) => {
 app.get('/logout', (req, res) => {
 	if (user_logged_in(req)) {
 		res.cookie('userID', -1, {signed: true});
-		res.redirect(302, 'login');
+		res.redirect(302, '/login');
 	} else {
-		res.redirect(302, 'login');
+		res.redirect(302, '/login');
 	}
 });
 
@@ -201,7 +203,7 @@ app.post('/login', (req, res) => {
 				res.cookie('userID', result.user_id, {signed: true});
 				res.redirect(302, '/');
 			} else {
-				res.redirect(302, 'login');
+				res.redirect(302, '/login');
 			}
 		}
 	});
@@ -211,7 +213,28 @@ app.get('/login', (req, res) => {
 	if (user_logged_in(req)) {
 		res.redirect(307, '/');
 	} else {
-		res.render('login', {title: "Login", loggedIn: user_logged_in(req)});
+		res.render('login', {title: "Login", loggedIn: false});
+	}
+});
+
+app.post('/register', (req, res) => {
+	if (req.body.regPasswordOne !== req.body.regPasswordTwo) {
+		res.redirect(302, '/login');
+	} else {
+		db_manager.check_email_in_use(req.body.regEmail, (checkErr, checkRes) => {
+			console.log(checkRes.exists);
+			if (!checkRes.exists) {
+				bcrypt.genSalt(saltRounds, (saltErr, salt) => {
+					bcrypt.hash(req.body.regPasswordOne, salt, (hashErr, hash) => {
+						db_manager.add_user(req.body.regEmail, req.body.regName, hash, (addUserErr, addUserRes) => {
+							res.redirect(302, '/characters');
+						});
+					});
+				});
+			} else {
+				res.redirect(302, '/login');
+			}
+		});
 	}
 });
 

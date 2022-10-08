@@ -14,7 +14,9 @@ module.exports =
 	list_classes,
 	list_characters,
 	find_user_by_email,
-	find_user_by_id
+	find_user_by_id,
+	check_email_in_use,
+	add_user
 };
 
 // NEW
@@ -151,6 +153,28 @@ function find_user_by_id(userID, callBack) {
 			failure: callBack(err, null);
 		} else {
 			success: callBack(null, res.rows[0]);
+		}
+	});
+}
+
+function check_email_in_use(userEmail, callBack) {
+	ofor_db.query("SELECT exists (SELECT 1 FROM users WHERE user_email = $1)", [userEmail], (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res.rows[0]);
+		}
+	});
+}
+
+function add_user(userEmail, userName, userPass, callBack) {
+	query = "INSERT INTO users (user_name, user_email, hashed_salted) VALUES ($1, $2, $3)";
+	values = [userName, userEmail, userPass];
+	ofor_db.query(query, values, (err, res) =>{
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res.rows);
 		}
 	});
 }
