@@ -40,28 +40,14 @@ function user_logged_in(req) {
 	}
 }
 
-app.post('/newcharacter', (req, res) => {
-	console.log(req.body);
-	const ourClass = parseInt(req.body.classSelection);
-	res.redirect(302, '/');
-});
-
-app.get('/newcharacter', (req, res) => {
-	if (user_logged_in(req)) {
-		db_manager.find_user_by_id(req.signedCookies.userID, (err, result) => {
-			if (err) {
-				res.redirect(302, '/');
-			} else {
-				db_manager.list_classes((classErr, classResult) => {
-					res.render('newcharacter',{title: 'Create New Character', 
-						loggedIn: true, classes: classResult});
-				});
-			}
-		});
+const check_user_logged = (req, res, next) => {
+	if (!req.signedCookies.userID || req.signedCookies.userID == -1) {
+		return res.redirect('/login');
 	} else {
-		res.redirect(302, '/login');
+		next();
 	}
-});
+} 
+
 
 app.post('/altercharacter', (req, res) => {
 	const ourCharID = parseInt(req.body.chID);
@@ -76,16 +62,12 @@ app.post('/altercharacter', (req, res) => {
 	});
 });
 
-app.get('/characters', (req, res) => {
-	if (user_logged_in(req)) {
-		db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
-			res.render('characterlist', {title: 'Your Characters', 
-				loggedIn: true, 
-				characters: charResult});
-		});
-	} else {
-		res.redirect(302, '/login');
-	}
+app.get('/characters', check_user_logged, (req, res) => {
+	db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
+		res.render('characterlist', {title: 'Your Characters', 
+			loggedIn: true, 
+			characters: charResult});
+	});
 });
 
 app.post('/additem', (req, res) => {
@@ -185,10 +167,35 @@ app.get('/characters/:charID', (req, res) => {
 	}
 });
 
-app.get('/logout', (req, res) => {
+app.post('/newcharacter', check_user_logged, (req, res) => {
+	db_manager.add_character(
+		parseInt(req.body.userID),
+		{
+			classID: parseInt(req.body.classSelection),
+			characterName: req.body.characterName
+		},
+		(err, result) => {
+			res.redirect(302, '/');
+		});
+});
+
+app.get('/newcharacter', check_user_logged, (req, res) => {
+	db_manager.find_user_by_id(req.signedCookies.userID, (err, result) => {
+		if (err) {
+			res.redirect(302, '/');
+		} else {
+			db_manager.list_classes((classErr, classResult) => {
+				res.render('newcharacter',{title: 'Create New Character', 
+					loggedIn: true, classes: classResult, ourUser: req.signedCookies.userID});
+			});
+		}
+	});
+});
+
+app.post('/logout', (req, res) => {
 	if (user_logged_in(req)) {
 		res.cookie('userID', -1, {signed: true});
-		res.redirect(302, '/login');
+		res.redirect(302, '/');
 	} else {
 		res.redirect(302, '/login');
 	}
@@ -209,24 +216,16 @@ app.post('/login', (req, res) => {
 	});
 });
 
-app.get('/login', (req, res) => {
-	if (user_logged_in(req)) {
-		res.redirect(307, '/');
-	} else {
-		res.render('login', {title: "Login", loggedIn: false});
-	}
-});
-
 app.post('/register', (req, res) => {
 	if (req.body.regPasswordOne !== req.body.regPasswordTwo) {
 		res.redirect(302, '/login');
 	} else {
 		db_manager.check_email_in_use(req.body.regEmail, (checkErr, checkRes) => {
-			console.log(checkRes.exists);
 			if (!checkRes.exists) {
 				bcrypt.genSalt(saltRounds, (saltErr, salt) => {
 					bcrypt.hash(req.body.regPasswordOne, salt, (hashErr, hash) => {
 						db_manager.add_user(req.body.regEmail, req.body.regName, hash, (addUserErr, addUserRes) => {
+							res.cookie('userID', addUserRes.user_id, {signed: true});
 							res.redirect(302, '/characters');
 						});
 					});
@@ -238,12 +237,18 @@ app.post('/register', (req, res) => {
 	}
 });
 
+app.get('/login', (req, res) => {
+	if (user_logged_in(req)) {
+		res.redirect(307, '/');
+	} else {
+		res.render('login', {title: "Login", loggedIn: false});
+	}
+});
+
 app.get('/', (req, res) => {
 	if (user_logged_in(req)) {
 		db_manager.find_user_by_id(req.signedCookies.userID, (err, result) => {
-			db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
-				res.render('index', {title: "Home", loggedIn: true, user: result, characters: charResult});
-			});
+			res.render('index', {title: "Home", loggedIn: true, user: result});
 		});
 	} else {
 		res.render('index', {title: "Home", loggedIn: false});

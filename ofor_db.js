@@ -13,6 +13,7 @@ module.exports =
 	find_character_by_id,
 	list_classes,
 	list_characters,
+	add_character,
 	find_user_by_email,
 	find_user_by_id,
 	check_email_in_use,
@@ -137,6 +138,26 @@ function list_characters(user_id, callBack) {
 	});
 }
 
+function add_character(userID, newCharacter, callBack) {
+	query = "INSERT INTO characters (user_id, class_id, character_name) VALUES ($1, $2, $3) RETURNING character_id";
+	values = [userID, newCharacter.classID, newCharacter.characterName];
+	ofor_db.query(query, values, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			equipQuery = "INSERT INTO character_equipment (character_id) VALUES ($1)";
+			equipValues = [res.rows[0].character_id];
+			ofor_db.query(equipQuery, equipValues, (eqErr, eqResult) => {
+				if (eqErr) {
+					failure: callBack(eqErr, null);
+				} else {
+					success: callBack(null, eqResult);
+				}
+			});
+		}
+	});
+}
+
 function find_user_by_email(user_email, callBack) {
 	ofor_db.query("SELECT user_id FROM users WHERE user_email = $1", [user_email], (err, res) => {
 		if (err) {
@@ -168,13 +189,13 @@ function check_email_in_use(userEmail, callBack) {
 }
 
 function add_user(userEmail, userName, userPass, callBack) {
-	query = "INSERT INTO users (user_name, user_email, hashed_salted) VALUES ($1, $2, $3)";
+	query = "INSERT INTO users (user_name, user_email, hashed_salted) VALUES ($1, $2, $3) RETURNING user_id";
 	values = [userName, userEmail, userPass];
 	ofor_db.query(query, values, (err, res) =>{
 		if (err) {
 			failure: callBack(err, null);
 		} else {
-			success: callBack(null, res.rows);
+			success: callBack(null, res.rows[0]);
 		}
 	});
 }
