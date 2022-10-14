@@ -175,7 +175,7 @@ app.post('/newcharacter', check_user_logged, (req, res) => {
 			characterName: req.body.characterName
 		},
 		(err, result) => {
-			res.redirect(302, '/');
+			res.redirect(302, '/characters');
 		});
 });
 
@@ -207,8 +207,14 @@ app.post('/login', (req, res) => {
 			console.log(err)
 		} else {
 			if (result) {
-				res.cookie('userID', result.user_id, {signed: true});
-				res.redirect(302, '/');
+				bcrypt.compare(req.body.loginPassword, result.hashed_salted, (bcErr, bcRes) => {
+					if (bcRes) {
+						res.cookie('userID', result.user_id, {signed: true});
+						res.redirect(302, '/characters');
+					} else {
+						res.redirect(302, '/login');
+					}
+				});
 			} else {
 				res.redirect(302, '/login');
 			}

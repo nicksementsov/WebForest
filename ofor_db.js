@@ -159,7 +159,7 @@ function add_character(userID, newCharacter, callBack) {
 }
 
 function find_user_by_email(user_email, callBack) {
-	ofor_db.query("SELECT user_id FROM users WHERE user_email = $1", [user_email], (err, res) => {
+	ofor_db.query("SELECT user_id, hashed_salted FROM users WHERE user_email = $1", [user_email], (err, res) => {
 		if (err) {
 			failure: callBack(err, null);
 		} else {
