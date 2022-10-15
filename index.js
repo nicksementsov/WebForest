@@ -46,8 +46,12 @@ const check_user_logged = (req, res, next) => {
 	} else {
 		next();
 	}
-} 
+}
 
+app.get('/requestData', (req, res) => {
+	if (req.signedCookies.userID)
+	res.send('huzzah!');
+});
 
 app.post('/altercharacter', (req, res) => {
 	const ourCharID = parseInt(req.body.chID);
@@ -104,6 +108,20 @@ app.get('/list/:category', (req, res) => {
 				picking: picking, 
 				ourPlayer: ourPlayer});
 		}
+	});
+});
+
+app.post('/embark', check_user_logged, (req, res) => {
+	console.log(req.body);
+	res.redirect(302, '/embark');
+});
+
+app.get('/embark', check_user_logged, (req, res) => {
+	db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
+		res.render('embark', {title: 'New Quest',
+			loggedIn: true,
+			ourUserID: req.signedCookies.userID,
+			characters: charResult});
 	});
 });
 
