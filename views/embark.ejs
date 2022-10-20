@@ -2,16 +2,19 @@
 <%- include ('partials/navbar') %>
 <div class="row">
 	<div class="col col-sm-12 col-lg-6">
-		<form action="/embark" method="POST">
+		<form class="needs-validation" action="/embark" name="embarkForm" onsubmit="return checkForm()" method="POST">
 			<h5>Embark on Quest!</h5>
 			<hr>
 			<div class="dropdown">
-				<select class="form-select mb-2" name="classSelection">
-					<option selected>Choose Character</option>
+				<select class="form-select mb-2" name="characterSelection" onchange="return lookupCharacter()">
+					<option value="none" selected>Choose Character</option>
 					<% for (let character of characters) { %>
 						<option value="<%= character.character_id %>"><%= character.character_name.trim() %> - Level <%= character.character_level %> <%= character.class_name %></option>
 					<% } %>
 				</select>
+				<div class="invalid-feedback">
+					Please select a character
+				</div>
 			</div>
 			<hr>
 			<button type="submit" class="btn btn-success float-end">Quest!</button>
@@ -20,22 +23,37 @@
 	<div class="col col-sm-12 col-lg-6">
 		<button id="testButton">Test!</button>
 		<h5 id="testTitle"></h5>
-		<script type="text/javascript">
-			var myArea = document.getElementById('testTitle');
-			var myButton = document.getElementById('testButton');
 
-			myButton.onclick = function() {
-				var xhttpData = new XMLHttpRequest()
-				xhttpData.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						myArea.innerHTML = xhttpData.responseText;
-						myArea.innerHTML = <%= ourUserID %>;
-					}
-				};
-				xhttpData.open("GET", '/requestData', true);
-				xhttpData.send();
-			}
-		</script>
 	</div>
 </div>
+<script type="text/javascript">
+	function checkForm() {
+		let characterSelection = document.forms["embarkForm"]["characterSelection"];
+		if (characterSelection.value == "none") {
+			characterSelection.classList.add("is-invalid");
+			return false;
+		}
+	}
+
+	function lookupCharacter() {
+		var charXhttp = new XMLHttpRequest();
+		let characterSelection = document.forms["embarkForm"]["characterSelection"];
+		console.log(characterSelection.value);
+	}
+
+
+	var myArea = document.getElementById('testTitle');
+	var myButton = document.getElementById('testButton');
+
+	myButton.onclick = function() {
+		var xhttpData = new XMLHttpRequest()
+		xhttpData.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				myArea.innerHTML = xhttpData.responseText;
+			}
+		};
+		xhttpData.open("GET", '/requestCharacter/1', true);
+		xhttpData.send();
+	}
+</script>
 <%- include ('partials/foot') %>

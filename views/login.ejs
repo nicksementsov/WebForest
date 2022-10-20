@@ -3,7 +3,7 @@
 <div class="row">
 	<div class="col-12 col-lg-6">
 		<h3>Login</h3>
-		<form action="/login" method="POST">
+		<form name="loginForm" action="/login" method="POST">
 			<div class="mb-3">
 				<label for="loginEmailField" class="form-label">Email address</label>
 				<input type="email" class="form-control" id="loginEmailField" name="loginEmail" aria-describedby="emailHelp">
@@ -21,25 +21,42 @@
 	</div>
 	<div class="col-12 col-lg-6">
 		<h3>Register</h3>
-		<form action="/register" method="POST">
+		<form class="needs-validation" name="registerForm" action="/register" onsubmit="return checkForm()" method="POST">
 			<div class="mb-3">
 				<label for="regEmailField" class="form-label">Email address</label>
-				<input type="email" class="form-control" id="regEmailField" name="regEmail" aria-describedby="emailHelp">
+				<input type="email" class="form-control" id="regEmailField" name="regEmail" aria-describedby="emailHelp" required>
 			</div>
 			<div class="mb-3">
 				<label for="regNameField" class="form-label">User Name</label>
-				<input type="text" class="form-control" id="regNameField" name="regName" aria-describedby="emailHelp">
+				<input type="text" class="form-control" id="regNameField" name="regName" aria-describedby="emailHelp" required>
 			</div>
 			<div class="mb-3">
 				<label for="regPasswordFieldOne" class="form-label">Password</label>
-				<input type="password" class="form-control" id="regPasswordFieldOne" name="regPasswordOne">
+				<input type="password" class="form-control" id="regPasswordFieldOne" name="regPasswordOne" required>
 			</div>
 			<div class="mb-3">
 				<label for="regPasswordFieldTwo" class="form-label">Confirm Password</label>
-				<input type="password" class="form-control" id="regPasswordFieldTwo" name="regPasswordTwo">
+				<input type="password" class="form-control" id="regPasswordFieldTwo" name="regPasswordTwo" required>
+				<div class="invalid-feedback">
+					Passwords must match!
+				</div>
 			</div>
 			<button type="submit" class="btn btn-primary">Register</button>
 		</form>
 	</div>
 </div>
+<script type="text/javascript">
+	function checkForm() {
+		let passFieldOne = document.forms["registerForm"]["regPasswordFieldOne"];
+		let passFieldTwo = document.forms["registerForm"]["regPasswordFieldTwo"];
+		if (passFieldOne.value != passFieldTwo.value) {
+			passFieldOne.classList.add("is-invalid");
+			passFieldTwo.classList.add("is-invalid");
+			return false;
+		} else {
+			passFieldOne.classList.remove("is-invalid");
+			passFieldTwo.classList.remove("is-invalid");
+		}
+	}
+</script>
 <%- include ('partials/foot') %>

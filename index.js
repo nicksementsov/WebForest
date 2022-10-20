@@ -48,9 +48,59 @@ const check_user_logged = (req, res, next) => {
 	}
 }
 
-app.get('/requestData', (req, res) => {
-	if (req.signedCookies.userID)
-	res.send('huzzah!');
+function buildCharacter(charID, callBack) {
+	function find_equipment_items(onSlot, eqItems, callBack) {
+		if (onSlot < equipment_slots.length) {
+			db_manager.find_equipment_item(eqItems[onSlot], onSlot, (err, result) => {
+				if (err) {
+					callBack(err, null);
+				} else {
+					equipment.push(result);
+					find_equipment_items(onSlot + 1, eqItems, callBack);
+				}
+			});
+		} else {
+			callBack(null, 'test');
+		}
+	}
+	var equipment = [];
+	console.log(charID);
+	db_manager.find_character_by_id(charID, (err, charResult) => {
+		db_manager.find_class(charResult.class_id, (classErr, classResult) => {
+			db_manager.find_character_equipment(charID, (eqErr, eqResult) => {
+				find_equipment_items(0, [
+					eqResult.head,
+					eqResult.body,
+					eqResult.leg,
+					eqResult.hand, 
+					eqResult.feet,
+					eqResult.left_hand,
+					eqResult.right_hand
+					], (eqFindErr, eqFindRes) => {
+					var stats = {
+						str: classResult.class_str,
+						int: classResult.class_int,
+						dex: classResult.class_dex,
+						cha: classResult.class_cha
+					}
+					for (let equipmentItem of equipment) {
+						stats.str += parseInt(equipmentItem.equipment_str),
+						stats.int += equipmentItem.equipment_int,
+						stats.dex += equipmentItem.equipment_dex,
+						stats.cha += equipmentItem.equipment_cha
+					}
+					callBack(null, {charResult, classResult, stats, equipment});
+				});
+			});
+		});
+	});
+}
+
+app.get('/requestCharacter/:charID', (req, res) => {
+	const { charID}  = req.params;
+	buildCharacter(charID, (err, result) => {
+		res.send(result);
+	});
 });
 
 app.post('/altercharacter', (req, res) => {
@@ -125,64 +175,32 @@ app.get('/embark', check_user_logged, (req, res) => {
 	});
 });
 
+
 app.get('/characters/:charID', (req, res) => {
-	function find_equipment_items(onSlot, eqItems, callBack) {
-		if (onSlot < equipment_slots.length) {
-			db_manager.find_equipment_item(eqItems[onSlot], onSlot, (err, result) => {
-				if (err) {
-					callBack(err, null);
-				} else {
-					equipment.push(result);
-					find_equipment_items(onSlot + 1, eqItems, callBack);
-				}
-			});
-		} else {
-			callBack(null, 'test');
-		}
-	}
-	var equipment = []
 	const { charID } = req.params;
-	if (user_logged_in(req)) {
-		db_manager.find_character_by_id(charID, (err, charResult) => {
-			db_manager.find_class(charResult.class_id, (classErr, classResult) => {
-				db_manager.find_character_equipment(charID, (eqErr, eqResult) => {
-					find_equipment_items(0, [
-						eqResult.head,
-						eqResult.body,
-						eqResult.leg,
-						eqResult.hand, 
-						eqResult.feet,
-						eqResult.left_hand,
-						eqResult.right_hand
-						], (eqFindErr, eqFindRes) => {
-						var stats = {
-							str: classResult.class_str,
-							int: classResult.class_int,
-							dex: classResult.class_dex,
-							cha: classResult.class_cha
-						}
-						for (let equipmentItem of equipment) {
-							stats.str += parseInt(equipmentItem.equipment_str),
-							stats.int += equipmentItem.equipment_int,
-							stats.dex += equipmentItem.equipment_dex,
-							stats.cha += equipmentItem.equipment_cha
-						}
-						res.render('viewcharacter', 
-							{
-								title: charResult.character_name, 
-								loggedIn: user_logged_in(req),
-								character: charResult, 
-								charClass: classResult,
-								stats: stats, 
-								equipment: equipment
-							});
-					});
-				});
+	buildCharacter(charID, (err, result) => {
+		console.log(result);
+		res.render('viewcharacter',
+			{title: result.charResult.character_name,
+				loggedIn: user_logged_in(req),
+				character: result.charResult,
+				charClass: result.classResult,
+				stats: result.stats,
+				equipment: result.equipment
 			});
-		});
-	} else {
-		res.redirect(302, '/login');
-	}
+	});
+	// buildCharacter(charID, (err, result) => {
+	// 	console.log(result);
+	// 	res.render('viewcharacter', result);
+	// });
+						// {
+						// 	title: charResult.character_name, 
+						// 	loggedIn: user_logged_in(req),
+						// 	character: charResult, 
+						// 	charClass: classResult,
+						// 	stats: stats, 
+						// 	equipment: equipment
+						// });
 });
 
 app.post('/newcharacter', check_user_logged, (req, res) => {
@@ -210,13 +228,9 @@ app.get('/newcharacter', check_user_logged, (req, res) => {
 	});
 });
 
-app.post('/logout', (req, res) => {
-	if (user_logged_in(req)) {
-		res.cookie('userID', -1, {signed: true});
-		res.redirect(302, '/');
-	} else {
-		res.redirect(302, '/login');
-	}
+app.post('/logout', check_user_logged, (req, res) => {
+	res.cookie('userID', -1, {signed: true});
+	res.redirect(302, '/');
 });
 
 app.post('/login', (req, res) => {
