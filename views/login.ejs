@@ -3,10 +3,13 @@
 <div class="row">
 	<div class="col-12 col-lg-6">
 		<h3>Login</h3>
-		<form name="loginForm" action="/login" method="POST">
+		<form name="loginForm" action="/login" onsubmit="return checkLoginForm()" method="POST">
 			<div class="mb-3">
 				<label for="loginEmailField" class="form-label">Email address</label>
 				<input type="email" class="form-control" id="loginEmailField" name="loginEmail" aria-describedby="emailHelp">
+				<div class="invalid-feedback">
+					Please enter the email of the account you want to login to
+				</div>
 			</div>
 			<div class="mb-3">
 				<label for="loginPasswordField" class="form-label">Password</label>
@@ -21,7 +24,7 @@
 	</div>
 	<div class="col-12 col-lg-6">
 		<h3>Register</h3>
-		<form class="needs-validation" name="registerForm" action="/register" onsubmit="return checkForm()" method="POST">
+		<form class="needs-validation" name="registerForm" action="/register" onsubmit="return checkRegisterForm()" method="POST">
 			<div class="mb-3">
 				<label for="regEmailField" class="form-label">Email address</label>
 				<input type="email" class="form-control" id="regEmailField" name="regEmail" aria-describedby="emailHelp" required>
@@ -46,7 +49,18 @@
 	</div>
 </div>
 <script type="text/javascript">
-	function checkForm() {
+	function checkLoginForm() {
+		let loginEmailField = document.forms["loginForm"]["loginEmail"];
+		let loginPasswordField = document.forms["loginForm"]["loginPassword"];
+
+		if (loginEmailField.value.length === 0) {
+			loginEmailField.classList.add("is-invalid");
+			return false;
+		} else {
+			loginEmailField.classList.remove("is-invalid");
+		}
+	}
+	function checkRegisterForm() {
 		let passFieldOne = document.forms["registerForm"]["regPasswordFieldOne"];
 		let passFieldTwo = document.forms["registerForm"]["regPasswordFieldTwo"];
 		if (passFieldOne.value != passFieldTwo.value) {

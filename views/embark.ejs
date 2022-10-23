@@ -1,7 +1,7 @@
 <%- include ('partials/head') %>
 <%- include ('partials/navbar') %>
 <div class="row">
-	<div class="col col-sm-12 col-lg-6">
+	<div class="col-12 col-lg-6">
 		<form class="needs-validation" action="/embark" name="embarkForm" onsubmit="return checkForm()" method="POST">
 			<h5>Embark on Quest!</h5>
 			<hr>
@@ -17,7 +17,42 @@
 				</div>
 			</div>
 			<hr>
-			<button type="submit" class="btn btn-success float-end">Quest!</button>
+			<div class="card mb-2 d-none" id="characterCard">
+				<img src="/static/img/warrior_lg_card.png" class="card-img-top" id="charCardImage">
+				<div class="card-body">
+					<h5 class="card-title" id="characterName">Bob Johnson</h5>
+					<h6 class="card-subtitle mb-2 text-muted" id="characterClass">Level 1 Warrior</h6>
+					<div class="row">
+						<div class="col-5">
+							Strength
+						</div>
+						<div class="col-1" id="charStr">
+							5
+						</div>
+						<div class="col-5">
+							Intelligence
+						</div>
+						<div class="col-1" id="charInt">
+							1
+						</div>
+						<div class="col-5">
+							Dexterity
+						</div>
+						<div class="col-1" id="charDex">
+							3
+						</div>
+						<div class="col-5">
+							Charisma
+						</div>
+						<div class="col-1" id="charCha">
+							1
+						</div>
+					</div>
+				</div>
+				<div class="card-footer">
+					<button type="submit" class="btn btn-success float-end">Quest!</button>
+				</div>
+			</div>
 		</form>
 	</div>
 	<div class="col col-sm-12 col-lg-6">
@@ -27,33 +62,64 @@
 	</div>
 </div>
 <script type="text/javascript">
+	let characterSelection = document.forms["embarkForm"]["characterSelection"];
+
 	function checkForm() {
-		let characterSelection = document.forms["embarkForm"]["characterSelection"];
 		if (characterSelection.value == "none") {
 			characterSelection.classList.add("is-invalid");
 			return false;
 		}
 	}
 
-	function lookupCharacter() {
-		var charXhttp = new XMLHttpRequest();
-		let characterSelection = document.forms["embarkForm"]["characterSelection"];
-		console.log(characterSelection.value);
-	}
 
+	function lookupCharacter() {
+		if (characterSelection.value != "none") {
+			var charXhttp = new XMLHttpRequest();
+			charXhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					let ourCharacter = JSON.parse(charXhttp.responseText);
+					characterCard.classList.remove("d-none");
+					characterName.innerHTML = `${ourCharacter.charResult.character_name}`
+					characterClass.innerHTML = `Level ${ourCharacter.charResult.character_level} ${ourCharacter.classResult.class_name}`;
+					charStr.innerHTML = ourCharacter.stats.str;
+					charInt.innerHTML = ourCharacter.stats.int;
+					charDex.innerHTML = ourCharacter.stats.dex;
+					charCha.innerHTML = ourCharacter.stats.cha;
+					console.log(ourCharacter);
+				}
+			};
+			charXhttp.open("GET", `/requestCharacter/${characterSelection.value}`, true);
+			charXhttp.send();
+		} else {
+			characterCard.classList.add("d-none");
+		}
+	}
 
 	var myArea = document.getElementById('testTitle');
 	var myButton = document.getElementById('testButton');
 
 	myButton.onclick = function() {
-		var xhttpData = new XMLHttpRequest()
-		xhttpData.onreadystatechange = function() {
-			if (this.readyState == 4 && this.status == 200) {
-				myArea.innerHTML = xhttpData.responseText;
-			}
-		};
-		xhttpData.open("GET", '/requestCharacter/1', true);
-		xhttpData.send();
+		if (characterSelection.value != "none") {
+			var charXhttp = new XMLHttpRequest();
+			charXhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					myArea.innerHTML = charXhttp.responseText;
+				}
+			};
+			charXhttp.open("GET", `/requestCharacter/${characterSelection.value}`, true);
+			charXhttp.send();
+		}
 	}
+
+	// myButton.onclick = function() {
+	// 	var xhttpData = new XMLHttpRequest()
+	// 	xhttpData.onreadystatechange = function() {
+	// 		if (this.readyState == 4 && this.status == 200) {
+	// 			myArea.innerHTML = xhttpData.responseText;
+	// 		}
+	// 	};
+	// 	xhttpData.open("GET", '/requestCharacter/1', true);
+	// 	xhttpData.send();
+	// }
 </script>
 <%- include ('partials/foot') %>

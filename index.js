@@ -64,7 +64,6 @@ function buildCharacter(charID, callBack) {
 		}
 	}
 	var equipment = [];
-	console.log(charID);
 	db_manager.find_character_by_id(charID, (err, charResult) => {
 		db_manager.find_class(charResult.class_id, (classErr, classResult) => {
 			db_manager.find_character_equipment(charID, (eqErr, eqResult) => {
@@ -189,18 +188,6 @@ app.get('/characters/:charID', (req, res) => {
 				equipment: result.equipment
 			});
 	});
-	// buildCharacter(charID, (err, result) => {
-	// 	console.log(result);
-	// 	res.render('viewcharacter', result);
-	// });
-						// {
-						// 	title: charResult.character_name, 
-						// 	loggedIn: user_logged_in(req),
-						// 	character: charResult, 
-						// 	charClass: classResult,
-						// 	stats: stats, 
-						// 	equipment: equipment
-						// });
 });
 
 app.post('/newcharacter', check_user_logged, (req, res) => {
