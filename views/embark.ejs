@@ -55,10 +55,25 @@
 			</div>
 		</form>
 	</div>
-	<div class="col col-sm-12 col-lg-6">
-		<button id="testButton">Test!</button>
-		<h5 id="testTitle"></h5>
-
+	<div class="col-12 col-lg-6">
+		<div class="row">
+			<div class="accordion" id="questaccordion">
+				<% for (let quest of quests) { %>
+					<div class="accordion-item">
+						<h2 class="accordion-header" id="heading<%= quest.quest_id%>"> 
+							<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<%= quest.quest_id %>" aria-expanded="false" aria-controls="collapse<%= quest.quest_id %>">
+								<%= quest.quest_title %>
+							</button>
+						</h2>
+						<div id="collapse<%= quest.quest_id %>" class="accordion-collapse collapse" aria-labelledby="heading<%= quest.quest_id %>" data-bs-parent="#questaccordion">
+							<div class="accordion-body">
+								<%= quest.quest_description %>
+							</div>
+						</div>
+					</div>
+				<% } %>
+			</div>
+		</div>
 	</div>
 </div>
 <script type="text/javascript">
@@ -70,7 +85,6 @@
 			return false;
 		}
 	}
-
 
 	function lookupCharacter() {
 		if (characterSelection.value != "none") {
@@ -85,7 +99,6 @@
 					charInt.innerHTML = ourCharacter.stats.int;
 					charDex.innerHTML = ourCharacter.stats.dex;
 					charCha.innerHTML = ourCharacter.stats.cha;
-					console.log(ourCharacter);
 				}
 			};
 			charXhttp.open("GET", `/requestCharacter/${characterSelection.value}`, true);
@@ -94,32 +107,5 @@
 			characterCard.classList.add("d-none");
 		}
 	}
-
-	var myArea = document.getElementById('testTitle');
-	var myButton = document.getElementById('testButton');
-
-	myButton.onclick = function() {
-		if (characterSelection.value != "none") {
-			var charXhttp = new XMLHttpRequest();
-			charXhttp.onreadystatechange = function() {
-				if (this.readyState == 4 && this.status == 200) {
-					myArea.innerHTML = charXhttp.responseText;
-				}
-			};
-			charXhttp.open("GET", `/requestCharacter/${characterSelection.value}`, true);
-			charXhttp.send();
-		}
-	}
-
-	// myButton.onclick = function() {
-	// 	var xhttpData = new XMLHttpRequest()
-	// 	xhttpData.onreadystatechange = function() {
-	// 		if (this.readyState == 4 && this.status == 200) {
-	// 			myArea.innerHTML = xhttpData.responseText;
-	// 		}
-	// 	};
-	// 	xhttpData.open("GET", '/requestCharacter/1', true);
-	// 	xhttpData.send();
-	// }
 </script>
 <%- include ('partials/foot') %>

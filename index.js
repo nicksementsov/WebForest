@@ -167,10 +167,15 @@ app.post('/embark', check_user_logged, (req, res) => {
 
 app.get('/embark', check_user_logged, (req, res) => {
 	db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
-		res.render('embark', {title: 'New Quest',
-			loggedIn: true,
-			ourUserID: req.signedCookies.userID,
-			characters: charResult});
+		db_manager.list_quests(100, (questErr, questResult) => {
+			console.log(questResult);
+			res.render('embark', {title: 'New Quest',
+				loggedIn: true,
+				ourUserID: req.signedCookies.userID,
+				characters: charResult,
+				quests: questResult
+			});
+		});
 	});
 });
 

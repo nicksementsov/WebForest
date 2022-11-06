@@ -4,6 +4,7 @@ const ofor_db = new Pool();
 module.exports = 
 {
 	// new
+	list_quests,
 	find_class,
 	modify_character_equipment,
 	add_equipment,
@@ -33,6 +34,18 @@ var equipment_slots =
 	"arms"
 ];
 
+function list_quests(level_limit, callBack) {
+	const query = "SELECT * FROM quest_list WHERE quest_level <= $1";
+	const values = [level_limit];
+	ofor_db.query(query, values, (err, res) =>{
+		if (err) {
+			failure: callBack(null, err);
+		} else {
+			success: callBack(null, res.rows);
+		}
+	});
+}
+
 function find_class(class_id, callBack) {
 	ofor_db.query("SELECT * FROM classes WHERE class_id = $1", [class_id], (err, res) => {
 		if (err) {
@@ -42,7 +55,6 @@ function find_class(class_id, callBack) {
 		}
 	});
 }
-
 
 function modify_character_equipment(player_id, equipment_id, equipment_slot, callBack) {
 	const query = `UPDATE character_equipment SET ${equipment_slot} = ${equipment_id} WHERE character_id = ${player_id}`;
