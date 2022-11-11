@@ -23,36 +23,21 @@
 					<h5 class="card-title" id="characterName">Bob Johnson</h5>
 					<h6 class="card-subtitle mb-2 text-muted" id="characterClass">Level 1 Warrior</h6>
 					<div class="row">
-						<div class="col-5">
-							Strength
-						</div>
-						<div class="col-1" id="charStr">
-							5
-						</div>
-						<div class="col-5">
-							Intelligence
-						</div>
-						<div class="col-1" id="charInt">
-							1
-						</div>
-						<div class="col-5">
-							Dexterity
-						</div>
-						<div class="col-1" id="charDex">
-							3
-						</div>
-						<div class="col-5">
-							Charisma
-						</div>
-						<div class="col-1" id="charCha">
-							1
-						</div>
+						<div class="col-5">Strength</div>
+						<div class="col-1" id="charStr">5</div>
+						<div class="col-5">Intelligence</div>
+						<div class="col-1" id="charInt">1</div>
+						<div class="col-5">Dexterity</div>
+						<div class="col-1" id="charDex">3</div>
+						<div class="col-5">Charisma</div>
+						<div class="col-1" id="charCha">1</div>
 					</div>
 				</div>
 				<div class="card-footer">
 					<button type="submit" class="btn btn-success float-end">Quest!</button>
 				</div>
 			</div>
+			<input type="hidden" id="formQuestSelection" name="questSelection" value="-1">
 		</form>
 	</div>
 	<div class="col-12 col-lg-6">
@@ -68,6 +53,11 @@
 						<div id="collapse<%= quest.quest_id %>" class="accordion-collapse collapse" aria-labelledby="heading<%= quest.quest_id %>" data-bs-parent="#questaccordion">
 							<div class="accordion-body">
 								<%= quest.quest_description %>
+								<hr>
+								Required Level: <%= quest.quest_level %>
+								<div class="float-end">Number of Characters: <%= quest.char_count %></div>
+								<hr>
+								<button type="button" class="btn btn-success quest_picker" value="<%= quest.quest_id %>" onclick="return chooseQuest(this)">Start this quest!</button>
 							</div>
 						</div>
 					</div>
@@ -105,6 +95,14 @@
 			charXhttp.send();
 		} else {
 			characterCard.classList.add("d-none");
+		}
+	}
+
+	function chooseQuest(questButton) {
+		formQuestSelection.value = questButton.value;
+		for (let qButton of document.getElementsByClassName("quest_picker")) {
+			qButton.innerHTML = "Start this quest!";
+			questButton.innerHTML = "Quest Selected";
 		}
 	}
 </script>

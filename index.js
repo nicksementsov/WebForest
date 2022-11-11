@@ -2,6 +2,7 @@ const path = require("path");
 const express = require("express");
 const cookieParser = require("cookie-parser")
 const bcrypt = require("bcrypt");
+const session = require("express-session");
 const db_manager = require("./ofor_db");
 
 const app = express();
@@ -10,6 +11,9 @@ const saltRounds = 10;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.SERVSECRET));
+app.use(session({
+	secret: process.env.SERVSECRET
+}));
 
 app.use('/static', express.static(path.join(__dirname, "/static")));
 app.use('/js', express.static(path.join(__dirname, '/js')));
@@ -106,11 +110,17 @@ app.post('/altercharacter', (req, res) => {
 	const ourCharID = parseInt(req.body.chID);
 	const ourItemID = parseInt(req.body.eqID);
 	const ourSlot = req.body.eqSlot;
-	db_manager.modify_character_equipment(ourCharID, ourItemID, ourSlot, (err, result) => {
-		if (err) {
-			console.log(err);
+	db_manager.find_character_by_id(req.body.chID, (charErr, charResult) => {
+		if (req.signedCookies.userID != charResult.user_id) {
+			res.redirect(301, `/characters/${ourCharID}`)
 		} else {
-			res.redirect(301, `/characters/${ourCharID}`);
+			db_manager.modify_character_equipment(ourCharID, ourItemID, ourSlot, (err, result) => {
+				if (err) {
+					console.log(err);
+				} else {
+					res.redirect(301, `/characters/${ourCharID}`);
+				}
+			});
 		}
 	});
 });
@@ -161,14 +171,21 @@ app.get('/list/:category', (req, res) => {
 });
 
 app.post('/embark', check_user_logged, (req, res) => {
-	console.log(req.body);
-	res.redirect(302, '/embark');
+	db_manager.find_character_by_id(req.body.characterSelection, (charErr, charResult) => {
+		if ((charResult.user_id != req.signedCookies.userID) || (charResult.on_quest === true)) {
+			res.redirect(302, '/embark');
+		} else {
+			db_manager.embark_character(charResult.character_id, req.body.questSelection, (embErr, embResult) => {
+				console.log(embResult);
+				res.redirect(302, '/embark');
+			});
+		}
+	});
 });
 
 app.get('/embark', check_user_logged, (req, res) => {
 	db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
 		db_manager.list_quests(100, (questErr, questResult) => {
-			console.log(questResult);
 			res.render('embark', {title: 'New Quest',
 				loggedIn: true,
 				ourUserID: req.signedCookies.userID,
@@ -183,7 +200,6 @@ app.get('/embark', check_user_logged, (req, res) => {
 app.get('/characters/:charID', (req, res) => {
 	const { charID } = req.params;
 	buildCharacter(charID, (err, result) => {
-		console.log(result);
 		res.render('viewcharacter',
 			{title: result.charResult.character_name,
 				loggedIn: user_logged_in(req),
@@ -214,7 +230,9 @@ app.get('/newcharacter', check_user_logged, (req, res) => {
 		} else {
 			db_manager.list_classes((classErr, classResult) => {
 				res.render('newcharacter',{title: 'Create New Character', 
-					loggedIn: true, classes: classResult, ourUser: req.signedCookies.userID});
+					loggedIn: true,
+					classes: classResult,
+					ourUser: req.signedCookies.userID});
 			});
 		}
 	});

@@ -4,6 +4,7 @@ const ofor_db = new Pool();
 module.exports = 
 {
 	// new
+	embark_character,
 	list_quests,
 	find_class,
 	modify_character_equipment,
@@ -34,12 +35,25 @@ var equipment_slots =
 	"arms"
 ];
 
+function embark_character(char_id, quest_id, callBack) {
+	const query = "UPDATE characters SET on_quest = true, quest_id = $1 WHERE character_id = $2";
+	values = [quest_id, char_id];
+	console.log(`values: ${values}`);
+	ofor_db.query(query, values, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res);
+		}
+	});
+}
+
 function list_quests(level_limit, callBack) {
 	const query = "SELECT * FROM quest_list WHERE quest_level <= $1";
 	const values = [level_limit];
 	ofor_db.query(query, values, (err, res) =>{
 		if (err) {
-			failure: callBack(null, err);
+			failure: callBack(err, null);
 		} else {
 			success: callBack(null, res.rows);
 		}
