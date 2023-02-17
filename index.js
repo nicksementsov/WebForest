@@ -2,7 +2,7 @@ const path = require("path");
 const express = require("express");
 const cookieParser = require("cookie-parser")
 const bcrypt = require("bcrypt");
-const session = require("express-session");
+// const session = require("express-session");
 const db_manager = require("./ofor_db");
 
 const app = express();
@@ -11,9 +11,9 @@ const saltRounds = 10;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.SERVSECRET));
-app.use(session({
-	secret: process.env.SERVSECRET
-}));
+// app.use(session({
+// 	secret: process.env.SERVSECRET
+// }));
 
 app.use('/static', express.static(path.join(__dirname, "/static")));
 app.use('/js', express.static(path.join(__dirname, '/js')));
@@ -251,7 +251,7 @@ app.post('/login', (req, res) => {
 			if (result) {
 				bcrypt.compare(req.body.loginPassword, result.hashed_salted, (bcErr, bcRes) => {
 					if (bcRes) {
-						res.cookie('userID', result.user_id, {signed: true});
+						res.cookie('userID', result.user_id, {signed: true}, { maxAge: 9000000 });
 						res.redirect(302, '/characters');
 					} else {
 						res.redirect(302, '/login');
@@ -273,7 +273,7 @@ app.post('/register', (req, res) => {
 				bcrypt.genSalt(saltRounds, (saltErr, salt) => {
 					bcrypt.hash(req.body.regPasswordOne, salt, (hashErr, hash) => {
 						db_manager.add_user(req.body.regEmail, req.body.regName, hash, (addUserErr, addUserRes) => {
-							res.cookie('userID', addUserRes.user_id, {signed: true});
+							res.cookie('userID', addUserRes.user_id, {signed: true}, { maxAge: 9000000 });
 							res.redirect(302, '/characters');
 						});
 					});
