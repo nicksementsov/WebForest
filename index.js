@@ -52,53 +52,6 @@ const check_user_logged = (req, res, next) => {
 	}
 }
 
-function buildCharacter(charID, callBack) {
-	function find_equipment_items(onSlot, eqItems, callBack) {
-		if (onSlot < equipment_slots.length) {
-			db_manager.find_equipment_item(eqItems[onSlot], onSlot, (err, result) => {
-				if (err) {
-					callBack(err, null);
-				} else {
-					equipment.push(result);
-					find_equipment_items(onSlot + 1, eqItems, callBack);
-				}
-			});
-		} else {
-			callBack(null, 'test');
-		}
-	}
-	var equipment = [];
-	db_manager.find_character_by_id(charID, (err, charResult) => {
-		db_manager.find_class(charResult.class_id, (classErr, classResult) => {
-			db_manager.find_character_equipment(charID, (eqErr, eqResult) => {
-				find_equipment_items(0, [
-					eqResult.head,
-					eqResult.body,
-					eqResult.leg,
-					eqResult.hand, 
-					eqResult.feet,
-					eqResult.left_hand,
-					eqResult.right_hand
-					], (eqFindErr, eqFindRes) => {
-					var stats = {
-						str: classResult.class_str,
-						int: classResult.class_int,
-						dex: classResult.class_dex,
-						cha: classResult.class_cha
-					}
-					for (let equipmentItem of equipment) {
-						stats.str += parseInt(equipmentItem.equipment_str),
-						stats.int += equipmentItem.equipment_int,
-						stats.dex += equipmentItem.equipment_dex,
-						stats.cha += equipmentItem.equipment_cha
-					}
-					callBack(null, {charResult, classResult, stats, equipment});
-				});
-			});
-		});
-	});
-}
-
 app.get('/requestCharacter/:charID', (req, res) => {
 	const { charID}  = req.params;
 	buildCharacter(charID, (err, result) => {
@@ -170,13 +123,86 @@ app.get('/list/:category', (req, res) => {
 	});
 });
 
-
 app.get('/viewquest/:questID',  check_user_logged, (req, res) => {
 	res.render('viewquest', {title: 'Viewing Quest', loggedIn: true});
 });
 
+function buildCharacter(charID, callBack) {
+	function find_equipment_items(onSlot, eqItems, callBack) {
+		if (onSlot < equipment_slots.length) {
+			db_manager.find_equipment_item(eqItems[onSlot], onSlot, (err, result) => {
+				if (err) {
+					callBack(err, null);
+				} else {
+					equipment.push(result);
+					find_equipment_items(onSlot + 1, eqItems, callBack);
+				}
+			});
+		} else {
+			callBack(null, 'test');
+		}
+	}
+	var equipment = [];
+	db_manager.find_character_by_id(charID, (err, charResult) => {
+		db_manager.find_class(charResult.class_id, (classErr, classResult) => {
+			db_manager.find_character_equipment(charID, (eqErr, eqResult) => {
+				find_equipment_items(0, [
+					eqResult.head,
+					eqResult.body,
+					eqResult.leg,
+					eqResult.hand, 
+					eqResult.feet,
+					eqResult.left_hand,
+					eqResult.right_hand
+					], (eqFindErr, eqFindRes) => {
+					var stats = {
+						str: classResult.class_str,
+						int: classResult.class_int,
+						dex: classResult.class_dex,
+						cha: classResult.class_cha
+					}
+					for (let equipmentItem of equipment) {
+						stats.str += parseInt(equipmentItem.equipment_str),
+						stats.int += equipmentItem.equipment_int,
+						stats.dex += equipmentItem.equipment_dex,
+						stats.cha += equipmentItem.equipment_cha
+					}
+					callBack(null, {charResult, classResult, stats, equipment});
+				});
+			});
+		});
+	});
+}
+
 app.get('/questlog', check_user_logged, (req, res) => {
-	res.render('questlog', {title: 'Quest Log', loggedIn: true});
+	function find_quests(onCharacter, characters, listLength, callBack) {
+		if (onCharacter < listLength) {
+			db_manager.find_quest_by_id(characters[onCharacter].quest_id, (err, res) => {
+				if (err) {
+					callBack(err, null);
+				} else {
+					quests.push(res);
+					find_quests(onCharacter + 1, characters, listLength, callBack);
+				}
+			});
+		} else {
+			callBack(null, 'finished');
+		}
+	}
+	var quests = [];
+	db_manager.find_characters_on_quest(req.signedCookies.userID, (charErr, charResult) => {
+		find_quests(0, charResult, charResult.length, (questErr, questRes) => {
+			console.log(charResult);
+			console.log(quests);
+			res.render('questlog',
+				{title: 'Quest Log',
+				loggedIn: true,
+				characters: charResult,
+				quests: quests,
+				numQuests: quests.length
+			});
+		});
+	}); 
 });
 
 app.post('/embark', check_user_logged, (req, res) => {
