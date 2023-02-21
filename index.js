@@ -170,13 +170,21 @@ app.get('/list/:category', (req, res) => {
 	});
 });
 
+
+app.get('/viewquest/:questID',  check_user_logged, (req, res) => {
+	res.render('viewquest', {title: 'Viewing Quest', loggedIn: true});
+});
+
+app.get('/questlog', check_user_logged, (req, res) => {
+	res.render('questlog', {title: 'Quest Log', loggedIn: true});
+});
+
 app.post('/embark', check_user_logged, (req, res) => {
 	db_manager.find_character_by_id(req.body.characterSelection, (charErr, charResult) => {
 		if ((charResult.user_id != req.signedCookies.userID) || (charResult.on_quest === true)) {
 			res.redirect(302, '/embark');
 		} else {
 			db_manager.embark_character(charResult.character_id, req.body.questSelection, (embErr, embResult) => {
-				console.log(embResult);
 				res.redirect(302, '/embark');
 			});
 		}

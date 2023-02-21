@@ -34,7 +34,10 @@
 					</div>
 				</div>
 				<div class="card-footer">
-					<button type="submit" class="btn btn-success float-end">Quest!</button>
+					<button type="submit" id="questButton" class="btn btn-success float-end">Quest!</button>
+					<div class="invalid-feedback">
+						Please select a quest
+					</div>
 				</div>
 			</div>
 			<input type="hidden" id="formQuestSelection" name="questSelection" value="-1">
@@ -74,6 +77,10 @@
 			characterSelection.classList.add("is-invalid");
 			return false;
 		}
+		if (formQuestSelection.value == '-1') {
+			questButton.classList.add("is-invalid");
+			return false;
+		}
 	}
 
 	function lookupCharacter() {
@@ -89,6 +96,13 @@
 					charInt.innerHTML = ourCharacter.stats.int;
 					charDex.innerHTML = ourCharacter.stats.dex;
 					charCha.innerHTML = ourCharacter.stats.cha;
+					if (ourCharacter.charResult.on_quest) {
+						questButton.setAttribute("disabled", "");
+						questButton.innerHTML = "Already on a quest!";
+					} else {
+						questButton.removeAttribute("disabled", "");
+						questButton.innerHTML = "Quest!";
+					}
 				}
 			};
 			charXhttp.open("GET", `/requestCharacter/${characterSelection.value}`, true);
