@@ -1,9 +1,0 @@
-TODO:
-
-	- implement timers for quests
-		* quests happen automatically, without user input
-			^ maybe have user input inbetween stages (ie, quest is ten minutes, broken into four stages,
-													  quest will pause until user provides input)
-	- Implement the viewquest page
-		* see status of quest (stages completed)
-		* see 
