@@ -92,6 +92,7 @@
 					characterCard.classList.remove("d-none");
 					characterName.innerHTML = `${ourCharacter.charResult.character_name}`
 					characterClass.innerHTML = `Level ${ourCharacter.charResult.character_level} ${ourCharacter.classResult.class_name}`;
+					charCardImage.src = `/static/img/${ourCharacter.classResult.class_name}_lg_card.png`
 					charStr.innerHTML = ourCharacter.stats.str;
 					charInt.innerHTML = ourCharacter.stats.int;
 					charDex.innerHTML = ourCharacter.stats.dex;

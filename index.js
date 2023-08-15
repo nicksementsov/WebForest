@@ -192,8 +192,6 @@ app.get('/questlog', check_user_logged, (req, res) => {
 	var quests = [];
 	db_manager.find_characters_on_quest(req.signedCookies.userID, (charErr, charResult) => {
 		find_quests(0, charResult, charResult.length, (questErr, questRes) => {
-			console.log(charResult);
-			console.log(quests);
 			res.render('questlog',
 				{title: 'Quest Log',
 				loggedIn: true,
@@ -210,8 +208,10 @@ app.post('/embark', check_user_logged, (req, res) => {
 		if ((charResult.user_id != req.signedCookies.userID) || (charResult.on_quest === true)) {
 			res.redirect(302, '/embark');
 		} else {
-			db_manager.embark_character(charResult.character_id, req.body.questSelection, (embErr, embResult) => {
-				res.redirect(302, '/embark');
+			// Use UTC time for everything, only convert to local when presenting the view
+			let questTime = new Date().toISOString();
+			db_manager.embark_character(charResult.character_id, req.body.questSelection, questTime, (embErr, embResult) => {
+				res.redirect(302, '/questlog');
 			});
 		}
 	});

@@ -49,9 +49,9 @@ function find_characters_on_quest(user_id, callBack) {
 	});
 }
 
-function embark_character(char_id, quest_id, callBack) {
-	const query = "UPDATE characters SET on_quest = true, quest_id = $1 WHERE character_id = $2";
-	values = [quest_id, char_id];
+function embark_character(char_id, quest_id, quest_time, callBack) {
+	const query = "UPDATE characters SET on_quest = true, quest_id = $1 , quest_start_dt = $3 WHERE character_id = $2";
+	values = [quest_id, char_id, quest_time];
 	ofor_db.query(query, values, (err, res) => {
 		if (err) {
 			failure: callBack(err, null);
