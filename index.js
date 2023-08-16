@@ -44,11 +44,21 @@ cron.schedule('0,15,30,45 * * * * *', function() {
 	console.log(`Chron! - ${Date()}`)
 	db_manager.find_all_characters_on_quest((err, res) => {
 		for (let row of res) {
-			console.log(`**** CHARACTER_ID: ${row.character_id} ****`)
-			let result = new Date() - new Date(row.quest_start_dt);
-			console.log(result / (1000*60));
-			console.log(new Date(row.quest_start_dt));
-			console.log(row);
+			db_manager.find_quest_by_id(row.quest_id, (questErr, questRes) => {
+				console.log(`**** CHARACTER_ID: ${row.character_id} ****`)
+				let current_dt = new Date();
+				let quest_start_dt = new Date(row.quest_start_dt);
+				let questTime = current_dt - quest_start_dt;
+				console.log(`Quest_${row.quest_id}: ${questRes.quest_title}`);
+				console.log(`Quest start time: ${row.quest_start_dt}`)
+				console.log(`Quest duration (minutes): ${questRes.quest_duration / 60}`);
+				console.log(`Time on quest (minutes) : ${questTime / (1000 * 60)}`);
+
+				// TODO:
+				// If questTime >= quest_duration:
+				// 		Take character of quest
+				//			Set on_quest=false, clear quest_id and quest_start_dt
+			});
 		}
 	});
 });
