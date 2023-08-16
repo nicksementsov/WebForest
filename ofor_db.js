@@ -4,6 +4,7 @@ const ofor_db = new Pool();
 module.exports = 
 {
 	// new
+	find_all_characters_on_quest,
 	find_characters_on_quest,
 	embark_character,
 	find_quest_by_id,
@@ -36,6 +37,17 @@ var equipment_slots =
 	"arms",
 	"arms"
 ];
+
+function find_all_characters_on_quest(callBack) {
+	const query = "SELECT character_id, user_id, quest_id, quest_start_dt FROM characters WHERE on_quest = 't'";
+	ofor_db.query(query, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res.rows);
+		}
+	});
+}
 
 function find_characters_on_quest(user_id, callBack) {
 	const query = "SELECT * FROM characters WHERE user_id = $1 and on_quest = 't'";
@@ -170,9 +182,9 @@ function list_classes(callBack) {
 	const query = "SELECT * FROM classes";
 	ofor_db.query(query, (err, res) => {
 		if (err) {
-			callBack(err, null);
+			failure: callBack(err, null);
 		} else {
-			callBack(null, res.rows);
+			success: callBack(null, res.rows);
 		}
 	});
 }

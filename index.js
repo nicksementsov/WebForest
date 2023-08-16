@@ -5,6 +5,8 @@ const bcrypt = require("bcrypt");
 // const session = require("express-session");
 const db_manager = require("./ofor_db");
 
+const cron = require('node-cron');
+
 const app = express();
 const PORT = 8080;
 const saltRounds = 10;
@@ -35,6 +37,23 @@ var equipment_slots =
 	"arms",
 	"arms"
 ];
+
+// ******TEST******
+
+cron.schedule('0,15,30,45 * * * * *', function() {
+	console.log(`Chron! - ${Date()}`)
+	db_manager.find_all_characters_on_quest((err, res) => {
+		for (let row of res) {
+			console.log(`**** CHARACTER_ID: ${row.character_id} ****`)
+			let result = new Date() - new Date(row.quest_start_dt);
+			console.log(result / (1000*60));
+			console.log(new Date(row.quest_start_dt));
+			console.log(row);
+		}
+	});
+});
+
+// ******TEST******
 
 function user_logged_in(req) {
 	if (req.signedCookies.userID && req.signedCookies.userID != -1) {
