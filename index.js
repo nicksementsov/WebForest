@@ -40,20 +40,27 @@ var equipment_slots =
 
 // ******TEST******
 
-cron.schedule('0,15,30,45 * * * * *', function() {
-	console.log(`Chron! - ${Date()}`)
+cron.schedule('* * * * * *', function() {
 	db_manager.find_all_characters_on_quest((err, res) => {
 		for (let row of res) {
 			db_manager.find_quest_by_id(row.quest_id, (questErr, questRes) => {
-				console.log(`**** CHARACTER_ID: ${row.character_id} ****`)
 				let current_dt = new Date();
 				let quest_start_dt = new Date(row.quest_start_dt);
 				let questTime = current_dt - quest_start_dt;
-				console.log(`Quest_${row.quest_id}: ${questRes.quest_title}`);
-				console.log(`Quest start time: ${row.quest_start_dt}`)
-				console.log(`Quest duration (minutes): ${questRes.quest_duration / 60}`);
-				console.log(`Time on quest (minutes) : ${questTime / (1000 * 60)}`);
 
+				// quest_duration is stored in seconds, questTime is in milliseconds
+				if ((questTime / 1000) >= questRes.quest_duration) {
+					db_manager.disembark_character(row.character_id, (embErr, embRes) => {
+						console.log(embRes);
+						console.log(`Chron! - ${Date()}`);
+					});
+				}
+
+				// console.log(`**** CHARACTER_ID: ${row.character_id} ****`)
+				// console.log(`Quest_${row.quest_id}: ${questRes.quest_title}`);
+				// console.log(`Quest start time: ${row.quest_start_dt}`)
+				// console.log(`Quest duration (minutes): ${questRes.quest_duration / 60}`);
+				// console.log(`Time on quest (minutes) : ${questTime / (1000 * 60)}`);
 				// TODO:
 				// If questTime >= quest_duration:
 				// 		Take character of quest
@@ -152,8 +159,22 @@ app.get('/list/:category', (req, res) => {
 	});
 });
 
-app.get('/viewquest/:questID',  check_user_logged, (req, res) => {
-	res.render('viewquest', {title: 'Viewing Quest', loggedIn: true});
+app.get('/viewquest/:questID/:charID',  check_user_logged, (req, res) => {
+	const questID = req.params.questID;
+	const charID = req.params.charID;
+	db_manager.find_character_by_id(charID, (charErr, charResult) => {
+		if (charResult.user_id != req.signedCookies.userID) {
+			res.redirect(302, '/questlog');
+		} else {
+			if (charResult.quest_id != questID) {
+				res.redirect(302, '/questlog');
+			} else {
+				db_manager.find_quest_by_id(questID, (questErr, questRes) => {
+					res.render('viewquest', {title: 'Viewing Quest', loggedIn: true});
+				});
+			}
+		}
+	});
 });
 
 function buildCharacter(charID, callBack) {
@@ -206,11 +227,11 @@ function buildCharacter(charID, callBack) {
 app.get('/questlog', check_user_logged, (req, res) => {
 	function find_quests(onCharacter, characters, listLength, callBack) {
 		if (onCharacter < listLength) {
-			db_manager.find_quest_by_id(characters[onCharacter].quest_id, (err, res) => {
-				if (err) {
+			db_manager.find_quest_by_id(characters[onCharacter].quest_id, (questErr, questRes) => {
+				if (questErr) {
 					callBack(err, null);
 				} else {
-					quests.push(res);
+					quests.push(questRes);
 					find_quests(onCharacter + 1, characters, listLength, callBack);
 				}
 			});

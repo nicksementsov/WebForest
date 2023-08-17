@@ -6,6 +6,7 @@ module.exports =
 	// new
 	find_all_characters_on_quest,
 	find_characters_on_quest,
+	disembark_character,
 	embark_character,
 	find_quest_by_id,
 	list_quests,
@@ -51,7 +52,19 @@ function find_all_characters_on_quest(callBack) {
 
 function find_characters_on_quest(user_id, callBack) {
 	const query = "SELECT * FROM characters WHERE user_id = $1 and on_quest = 't'";
-	const values = [user_id]
+	const values = [user_id];
+	ofor_db.query(query, values, (err, res) => {
+		if (err) {
+			failure: callBack(err, null);
+		} else {
+			success: callBack(null, res.rows);
+		}
+	});
+}
+
+function disembark_character(char_id, callBack) {
+	const query = "UPDATE characters SET on_quest = false, quest_id = null, quest_start_dt = null WHERE character_id = $1";
+	values = [char_id];
 	ofor_db.query(query, values, (err, res) => {
 		if (err) {
 			failure: callBack(err, null);
@@ -62,7 +75,7 @@ function find_characters_on_quest(user_id, callBack) {
 }
 
 function embark_character(char_id, quest_id, quest_time, callBack) {
-	const query = "UPDATE characters SET on_quest = true, quest_id = $1 , quest_start_dt = $3 WHERE character_id = $2";
+	const query = "UPDATE characters SET on_quest = true, quest_id = $1, quest_start_dt = $3 WHERE character_id = $2";
 	values = [quest_id, char_id, quest_time];
 	ofor_db.query(query, values, (err, res) => {
 		if (err) {
