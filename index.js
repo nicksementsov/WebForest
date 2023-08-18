@@ -165,19 +165,22 @@ app.get('/viewquest/:questID/:charID',  check_user_logged, (req, res) => {
 	buildCharacter(charID, (testErr, testRes) => {
 		console.log(testRes);
 	});
-	db_manager.find_character_by_id(charID, (charErr, charRes) => {
-		if (charRes.user_id != req.signedCookies.userID) {
+	buildCharacter(charID, (charErr, charRes) => {
+		if (charRes.charResult.user_id != req.signedCookies.userID) {
 			res.redirect(302, '/questlog');
 		} else {
-			if (charRes.quest_id != questID) {
+			if (charRes.charResult.quest_id != questID) {
 				res.redirect(302, '/questlog');
 			} else {
 				db_manager.find_quest_by_id(questID, (questErr, questRes) => {
 					let current_dt = new Date();
-					let quest_start_dt = new Date(charRes.quest_start_dt);
+					let quest_start_dt = new Date(charRes.charResult.quest_start_dt);
 					let time_on_quest = (current_dt - quest_start_dt) / 1000;
 					res.render('viewquest', {title: 'Viewing Quest', loggedIn: true, 
-						ourCharacter: charRes, ourQuest: questRes, questTime: time_on_quest});
+						ourCharacter: charRes.charResult,
+						ourClass: charRes.classResult,
+						ourQuest: questRes, 
+						questTime: time_on_quest});
 				});
 			}
 		}

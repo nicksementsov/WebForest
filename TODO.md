@@ -8,5 +8,7 @@
 
 ***
 > ## Implement the viewquest page
+> ### Refresh page when quest is complete
+> - or go to new quest completed page
 > ### see status of quest (stages completed)
 > - characters will face challenges to be overcome, character and gear selection will influence quest success chance
