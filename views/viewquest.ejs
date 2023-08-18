@@ -1,7 +1,37 @@
 <%- include ('partials/head') %>
 <%- include ('partials/navbar') %>
 <div class="row">
+	<div class="col col-lg-6">
+		<h2><%= ourQuest.quest_title %></h2>
+		<p id="quest_timer"></p>
+		<p class="d-inline-flex gap-1">
+			<button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#quest_descr" aria-expanded="false" aria-controls="quest_descr">
+				View Quest Description
+			</button>
+		</p>
+		<div class="collapse" id="quest_descr">
+			<div class="card card-body">
+				<%= ourQuest.quest_description %>
+			</div>
+		</div>
+	</div>
+	<div class="col col-lg-6">
+		<h2><%= ourCharacter.character_name %></h2>
+		<p>Level <%= ourCharacter.character_level %></p>
+	</div>
 </div>
+
+<script type="text/javascript">
+	var quest_start_dt = new Date("<%= ourCharacter.quest_start_dt %>");
+	var quest_duration = <%= ourQuest.quest_duration %>
+	var x = setInterval(function() {
+		var current_dt = new Date();
+		var quest_remainder = Math.floor(quest_duration - ((current_dt - quest_start_dt) / 1000));
+		var minutes = Math.floor(quest_remainder / 60);
+		var seconds = Math.floor(quest_remainder % 60);
+		quest_timer.innerHTML = `${minutes}:${seconds} until quest completion`;
+	}, 1000);
+</script>
 <%- include ('partials/foot') %>
 
 <!-- Quests will be a choose your own adventure thing. Each quest will have multiple
