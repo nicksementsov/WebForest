@@ -162,26 +162,27 @@ app.get('/list/:category', (req, res) => {
 app.get('/viewquest/:questID/:charID',  check_user_logged, (req, res) => {
 	const questID = req.params.questID;
 	const charID = req.params.charID;
-	buildCharacter(charID, (testErr, testRes) => {
-		console.log(testRes);
-	});
 	buildCharacter(charID, (charErr, charRes) => {
-		if (charRes.charResult.user_id != req.signedCookies.userID) {
+		if (charErr == -1) {
 			res.redirect(302, '/questlog');
 		} else {
-			if (charRes.charResult.quest_id != questID) {
-				res.redirect(302, '/questlog');
+			if (charRes.charResult.user_id != req.signedCookies.userID) {
+				res.redirect(303, '/questlog');
 			} else {
-				db_manager.find_quest_by_id(questID, (questErr, questRes) => {
-					let current_dt = new Date();
-					let quest_start_dt = new Date(charRes.charResult.quest_start_dt);
-					let time_on_quest = (current_dt - quest_start_dt) / 1000;
-					res.render('viewquest', {title: 'Viewing Quest', loggedIn: true, 
-						ourCharacter: charRes.charResult,
-						ourClass: charRes.classResult,
-						ourQuest: questRes, 
-						questTime: time_on_quest});
-				});
+				if (charRes.charResult.quest_id != questID) {
+					res.redirect(302, '/questlog');
+				} else {
+					db_manager.find_quest_by_id(questID, (questErr, questRes) => {
+						let current_dt = new Date();
+						let quest_start_dt = new Date(charRes.charResult.quest_start_dt);
+						let time_on_quest = (current_dt - quest_start_dt) / 1000;
+						res.render('viewquest', {title: 'Viewing Quest', loggedIn: true, 
+							ourCharacter: charRes.charResult,
+							ourClass: charRes.classResult,
+							ourQuest: questRes, 
+							questTime: time_on_quest});
+					});
+				}
 			}
 		}
 	});
@@ -204,6 +205,9 @@ function buildCharacter(charID, callBack) {
 	}
 	var equipment = [];
 	db_manager.find_character_by_id(charID, (err, charResult) => {
+		if (!charResult) {
+			return callBack('-1', null);
+		}
 		db_manager.find_class(charResult.class_id, (classErr, classResult) => {
 			db_manager.find_character_equipment(charID, (eqErr, eqResult) => {
 				find_equipment_items(0, [
@@ -395,6 +399,10 @@ app.get('/', (req, res) => {
 	} else {
 		res.render('index', {title: "Home", loggedIn: false});
 	}
+});
+
+app.use((req, res) => {
+	res.status(404).render('404_error', {title: '404 Page Not Found', loggedIn: user_logged_in(req)});
 });
 
 app.listen(PORT, () => {

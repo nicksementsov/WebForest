@@ -1,7 +1,7 @@
 <%- include ('partials/head') %>
 <%- include ('partials/navbar') %>
 <div class="row">
-	<div class="col col-lg-6">
+	<div class="col-12 col-lg-6">
 		<h2><%= ourQuest.quest_title %></h2>
 		<p id="quest_timer"></p>
 		<p class="d-inline-flex gap-1">
@@ -15,7 +15,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="col col-lg-6">
+	<div class="col-12 col-lg-6">
 		<h2><%= ourCharacter.character_name %></h2>
 		<p>Level <%= ourCharacter.character_level %> <%= ourClass.class_name %></p>
 	</div>
