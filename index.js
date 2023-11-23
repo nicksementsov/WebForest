@@ -1,5 +1,6 @@
 const path = require("path");
 const express = require("express");
+const morgan = require("morgan");
 const cookieParser = require("cookie-parser")
 const bcrypt = require("bcrypt");
 // const session = require("express-session");
@@ -12,6 +13,7 @@ const PORT = 8080;
 const saltRounds = 10;
 
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan('tiny'));
 app.use(cookieParser(process.env.SERVSECRET));
 // app.use(session({
 // 	secret: process.env.SERVSECRET
@@ -72,6 +74,7 @@ cron.schedule('* * * * * *', function() {
 
 // ******TEST******
 
+// Function to see if user is logged in
 function user_logged_in(req) {
 	if (req.signedCookies.userID && req.signedCookies.userID != -1) {
 		return true;
@@ -80,6 +83,7 @@ function user_logged_in(req) {
 	}
 }
 
+// Check if user is logged in middleware
 const check_user_logged = (req, res, next) => {
 	if (!req.signedCookies.userID || req.signedCookies.userID == -1) {
 		return res.redirect('/login');
@@ -88,6 +92,7 @@ const check_user_logged = (req, res, next) => {
 	}
 }
 
+// Returns all character detail for given charID as a single JSON object
 app.get('/requestCharacter/:charID', (req, res) => {
 	const { charID}  = req.params;
 	buildCharacter(charID, (err, result) => {
@@ -95,6 +100,7 @@ app.get('/requestCharacter/:charID', (req, res) => {
 	});
 });
 
+// Alter character/change equipment post
 app.post('/altercharacter', (req, res) => {
 	const ourCharID = parseInt(req.body.chID);
 	const ourItemID = parseInt(req.body.eqID);
@@ -114,6 +120,7 @@ app.post('/altercharacter', (req, res) => {
 	});
 });
 
+// List user characters page
 app.get('/characters', check_user_logged, (req, res) => {
 	db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
 		res.render('characterlist', {title: 'Your Characters', 
@@ -122,6 +129,7 @@ app.get('/characters', check_user_logged, (req, res) => {
 	});
 });
 
+// Add item post
 app.post('/additem', (req, res) => {
 	db_manager.add_equipment(req.body.category, req.body, (err, result) => {
 		if (err) {
@@ -132,6 +140,7 @@ app.post('/additem', (req, res) => {
 	});
 });
 
+// Item list page
 app.get('/list/:category', (req, res) => {
 	var { category } = req.params;
 	var picking = false;
@@ -159,6 +168,7 @@ app.get('/list/:category', (req, res) => {
 	});
 });
 
+// View quest page
 app.get('/viewquest/:questID/:charID',  check_user_logged, (req, res) => {
 	const questID = req.params.questID;
 	const charID = req.params.charID;
@@ -188,7 +198,9 @@ app.get('/viewquest/:questID/:charID',  check_user_logged, (req, res) => {
 	});
 });
 
+// Function to compile all character info into single object
 function buildCharacter(charID, callBack) {
+	// Recursive function to find details for all equipment worn by a character 
 	function find_equipment_items(onSlot, eqItems, callBack) {
 		if (onSlot < equipment_slots.length) {
 			db_manager.find_equipment_item(eqItems[onSlot], onSlot, (err, result) => {
@@ -208,6 +220,7 @@ function buildCharacter(charID, callBack) {
 		if (!charResult) {
 			return callBack('-1', null);
 		}
+		// Base class info stored in dedicated table
 		db_manager.find_class(charResult.class_id, (classErr, classResult) => {
 			db_manager.find_character_equipment(charID, (eqErr, eqResult) => {
 				find_equipment_items(0, [
@@ -238,6 +251,7 @@ function buildCharacter(charID, callBack) {
 	});
 }
 
+// User questlog page
 app.get('/questlog', check_user_logged, (req, res) => {
 	function find_quests(onCharacter, characters, listLength, callBack) {
 		if (onCharacter < listLength) {
@@ -267,6 +281,7 @@ app.get('/questlog', check_user_logged, (req, res) => {
 	}); 
 });
 
+// Quest embarkation post
 app.post('/embark', check_user_logged, (req, res) => {
 	db_manager.find_character_by_id(req.body.characterSelection, (charErr, charResult) => {
 		if ((charResult.user_id != req.signedCookies.userID) || (charResult.on_quest === true)) {
@@ -281,6 +296,7 @@ app.post('/embark', check_user_logged, (req, res) => {
 	});
 });
 
+// Quest embarkation page
 app.get('/embark', check_user_logged, (req, res) => {
 	db_manager.list_characters(req.signedCookies.userID, (charErr, charResult) => {
 		db_manager.list_quests(100, (questErr, questResult) => {
@@ -294,7 +310,7 @@ app.get('/embark', check_user_logged, (req, res) => {
 	});
 });
 
-
+// Character view page
 app.get('/characters/:charID', (req, res) => {
 	const { charID } = req.params;
 	buildCharacter(charID, (err, result) => {
@@ -309,6 +325,7 @@ app.get('/characters/:charID', (req, res) => {
 	});
 });
 
+// Character creation post
 app.post('/newcharacter', check_user_logged, (req, res) => {
 	db_manager.add_character(
 		parseInt(req.body.userID),
@@ -321,6 +338,7 @@ app.post('/newcharacter', check_user_logged, (req, res) => {
 		});
 });
 
+// Character creation page
 app.get('/newcharacter', check_user_logged, (req, res) => {
 	db_manager.find_user_by_id(req.signedCookies.userID, (err, result) => {
 		if (err) {
@@ -336,11 +354,13 @@ app.get('/newcharacter', check_user_logged, (req, res) => {
 	});
 });
 
+// User logout post
 app.post('/logout', check_user_logged, (req, res) => {
 	res.cookie('userID', -1, {signed: true});
 	res.redirect(302, '/');
 });
 
+// User login post
 app.post('/login', (req, res) => {
 	db_manager.find_user_by_email(req.body.loginEmail, (err, result) => {
 		if (err) {
@@ -362,6 +382,7 @@ app.post('/login', (req, res) => {
 	});
 });
 
+// User registration post
 app.post('/register', (req, res) => {
 	if (req.body.regPasswordOne !== req.body.regPasswordTwo) {
 		res.redirect(302, '/login');
@@ -383,6 +404,7 @@ app.post('/register', (req, res) => {
 	}
 });
 
+// Login page
 app.get('/login', (req, res) => {
 	if (user_logged_in(req)) {
 		res.redirect(307, '/');
@@ -391,6 +413,7 @@ app.get('/login', (req, res) => {
 	}
 });
 
+// Home Page
 app.get('/', (req, res) => {
 	if (user_logged_in(req)) {
 		db_manager.find_user_by_id(req.signedCookies.userID, (err, result) => {
@@ -401,6 +424,7 @@ app.get('/', (req, res) => {
 	}
 });
 
+// 404 Route
 app.use((req, res) => {
 	res.status(404).render('404_error', {title: '404 Page Not Found', loggedIn: user_logged_in(req)});
 });
